@@ -1,2 +1,4 @@
 # canvas-edt.js
-Programming
+To simplify the canvas programming
+
+Programming ...
