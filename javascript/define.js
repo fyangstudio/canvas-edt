@@ -70,6 +70,34 @@
         }
     };
     /*
+     * 解析插件信息
+     * @param  {String} _uri 地址
+     * @return {Array}       插件信息
+     */
+    var _doParsePlugin = (function () {
+        var _pmap = {
+            $text: function (_uri) {
+                _doLoadText(_uri);
+            },
+            $json: function (_uri) {
+                console.log('json!');
+            }
+        };
+        return function (_uri) {
+            var _brr = [],
+                _type = null,
+                _arr = _uri.split('!'),
+                _fun = _pmap[_arr[0].toLowerCase()];
+            if (!!_fun) {
+                _type = _arr.shift();
+            }
+            _brr.push(_arr.join('!'));
+            _brr.push(_fun || _doLoadScript);
+            _brr.push(_type);
+            return _brr;
+        };
+    })();
+    /*
      * 格式化地址,取绝对路径
      * @param  {String} _uri 待格式化地址
      * @return {String}      格式化后地址
@@ -92,7 +120,7 @@
         var _root = function (_uri) {
             return _uri.replace(_reg2, '');
         };
-        var _format = function (_uri) {
+        var _format = function (_uri, _type) {
             _append();
             var _arr = _uri.split('!'),
                 _site = '',
@@ -102,6 +130,7 @@
                 _site = __config.site[_arr.shift()];
                 _path = _arr.join('!');
             }
+            if (_type) _sufx = '';
             _uri = (_site + _path + _sufx).replace(_reg1, '$1/');
             _anchor.href = _uri;
             _uri = _anchor.href;
@@ -119,12 +148,12 @@
             }
             if (!_uri) return '';
             if (_absolute(_uri)) {
-                return _format(_uri);
+                return _format(_uri, _type);
             }
             if (_base && _uri.indexOf('.') == 0) {
                 _uri = _root(_base) + _uri;
             }
-            return _format(_uri);
+            return _format(_uri, _type);
         };
     })();
     /*
@@ -196,6 +225,61 @@
         _doClearScript(_script);
         _doCheckLoading();
     };
+    /*
+     * 载入依赖文本
+     * @param  {String} _uri 文本地址
+     * @return {Void}
+     */
+    var _doLoadText = (function () {
+        var _msid,
+            _msxml = [
+                'Msxml2.XMLHTTP.6.0',
+                'Msxml2.XMLHTTP.3.0',
+                'Msxml2.XMLHTTP.4.0',
+                'Msxml2.XMLHTTP.5.0',
+                'MSXML2.XMLHTTP',
+                'Microsoft.XMLHTTP'
+            ];
+        var _getXHR = function () {
+            if (!!_g.XMLHttpRequest) {
+                return new _g.XMLHttpRequest();
+            }
+            if (!!_msid) {
+                return new ActiveXObject(_msid);
+            }
+            for (var i = 0, l = _msxml.length, _it; i < l; i++) {
+                try {
+                    _it = _msxml[i];
+                    var _xhr = new ActiveXObject(_it);
+                    _msid = _it;
+                    return _xhr;
+                } catch (e) {
+                    // ignore
+                }
+            }
+        };
+        return function (_uri, _callback) {
+            if (!_uri) return;
+            var _state = __scache[_uri];
+            if (_state != null) return;
+            // load text
+            __scache[_uri] = 0;
+            var _xhr = _getXHR();
+            _xhr.onreadystatechange = function () {
+                if (_xhr.readyState == 4) {
+                    var _text = _xhr.responseText || '';
+                    __scache[_uri] = 2;
+                    __rcache[_uri] = _text;
+                    if (!!_callback) {
+                        _callback(_text);
+                    }
+                    _doCheckLoading();
+                }
+            };
+            _xhr.open('GET', _uri, !0);
+            _xhr.send(null);
+        };
+    })();
     /*
      * 检查依赖载入情况
      * @return {Void}
@@ -331,6 +415,7 @@
                 _doMergeResult(_item.n, _result);
             }
             __scache[_item.n] = 2;
+            console.log('do ' + _item.n);
         };
     })();
     /*
@@ -387,8 +472,7 @@
             var _args = _doFormatARG.apply(
                 _g, arguments
             );
-            _uri = _args[0] ||
-            _doFormatURI('./' + (_seed++) + '.js');
+            _uri = _args[0] || _doFormatURI('./' + (_seed++) + '.js');
             _deps = _args[1];
             _callback = _args[2];
             // check module defined in file
@@ -420,14 +504,12 @@
                         // 0 - url
                         // 1 - load function
                         // 2 - resource type
-                        _itm = _doFormatURI(_itt);
-                        _kmap[_itt] = _itm;
+                        _arr = _doParsePlugin(_itt);
+                        _itm = _doFormatURI(_arr[0], _uri, _arr[2]);
                         _list[k] = _itm;
-                        _doLoadScript(_itm);
+                        _arr[1](_itm);
                     }
-                    if (_it === 'h' && !!_xmap.f) {
-                        _xmap.f.kmap = _kmap;
-                    }
+
                 }
             }
             // check state

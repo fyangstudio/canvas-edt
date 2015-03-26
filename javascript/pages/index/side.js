@@ -1,3 +1,5 @@
-define(function () {
-    console.log('side!');
+define([
+    '$text!./side.html'
+], function (tpl) {
+    console.log(tpl);
 });
