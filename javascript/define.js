@@ -49,13 +49,11 @@
      * @return {Void}
      */
     var _doInit = function () {
-        // do init add loaded script and remove node
         var _list = _d.getElementsByTagName('script');
         if (!_list || !_list.length) return;
         var _reg = /\/define\.js(?=\?|#|$)/;
         for (var i = _list.length - 1, _script, _uri; i >= 0; i--) {
             _script = _list[i];
-            _script.get = !0;
             _uri = _script.src;
             if (_reg.test(_uri)) {
                 var _arr = _uri.split(/[?#]/);
@@ -64,7 +62,7 @@
                     _site[x] = _obj[x];
                 }
             } else {
-                //todo
+                _doScriptLoaded(_script);
             }
         }
         if (!_g.define) {
@@ -77,61 +75,44 @@
      * @return {String}      格式化后地址
      */
     var _doFormatURI = (function () {
-        var _init = !1,
+        var _xxx = !1,
             _reg1 = /([^:])\/+/g,
-            _reg2 = /\.js$/i,
-            _anchor = _d.createElement('a'),
-            _classMap = {
-                text: function (_uri) {
-                    // todo
-                },
-                json: function (_uri) {
-                    // todo
-                }
-            },
-            _browerMap = ['webkit', 'ie', 'firefox'];
+            _reg2 = /[^\/]*$/,
+            _reg3 = /\.js$/i,
+            _anchor = _d.createElement('a');
         var _absolute = function (_uri) {
             return _uri.indexOf('://') > 0;
         };
         var _append = function () {
-            if (_init) return;
-            _init = !0;
+            if (_xxx) return;
+            _xxx = !0;
             _anchor.style.display = 'none';
             document.body.appendChild(_anchor);
         };
-        var _parse = function (_uri) {
-            var _brr = [],
-                _type = null,
-                _arr = _uri.split('!'),
-                _fun = _classMap[_arr[0].toLowerCase()];
-            if (_arr.length > 1) {
-                _type = _arr.shift();
-            }
-            _brr.push(_arr.join('!'));
-            _brr.push(_fun || _doLoadScript);
-            _brr.push(_type);
-            return _brr;
+        var _root = function (_uri) {
+            return _uri.replace(_reg2, '');
         };
         var _format = function (_uri) {
             _append();
+            var _arr = _uri.split('!'),
+                _site = '',
+                _path = _uri,
+                _sufx = _reg3.test(_uri) ? '' : '.js';
+            if (_arr.length > 1) {
+                _site = __config.site[_arr.shift()];
+                _path = _arr.join('!');
+            }
+            _uri = (_site + _path + _sufx).replace(_reg1, '$1/');
             _anchor.href = _uri;
             _uri = _anchor.href;
             return _absolute(_uri) && _uri.indexOf('./') < 0 ? _uri : _anchor.getAttribute('href', 4); // ie6/7
         };
-        var _amdPath = function (_uri) {
-            var _arr = _parse(_uri),
-                _site = __config.site[_arr[2]] || '',
-                _sufx = _reg2.test(_uri) ? '' : '.js';
-            // load resource
-            //_arr[1](_itm);
-            return (_site + _arr[0] + _sufx).replace(_reg1, '$1/');
-        };
-        return function (_uri) {
+        return function (_uri, _base, _type) {
             if (_helper.isTypeOf(_uri, 'Array')) {
                 var _list = [];
                 for (var i = 0; i < _uri.length; i++) {
                     _list.push(
-                        _doFormatURI(_uri[i])
+                        _doFormatURI(_uri[i], _base, _type)
                     );
                 }
                 return _list;
@@ -140,7 +121,10 @@
             if (_absolute(_uri)) {
                 return _format(_uri);
             }
-            return _format(_amdPath(_uri));
+            if (_base && _uri.indexOf('.') == 0) {
+                _uri = _root(_base) + _uri;
+            }
+            return _format(_uri);
         };
     })();
     /*
@@ -153,16 +137,11 @@
             var _element = _helper.getTarget(_event) || this;
             if (!_element) return;
             var _state = _element.readyState;
-            if (_state === 'loaded' ||
-                _state === 'complete')
-                _doScriptLoaded(_element, !0);
+            if (_state === 'loaded' || _state === 'complete') _doScriptLoaded(_element, !0);
         };
         return function (_script) {
             _script.onload = function (e) {
-                _doScriptLoaded(_helper.getTarget(e), !0);
-            };
-            _script.onerror = function (e) {
-                _doScriptLoaded(_helper.getTarget(e), !1);
+                _doScriptLoaded(_helper.getTarget(e));
             };
             _script.onreadystatechange = _statechange;
         };
@@ -173,13 +152,8 @@
      */
     var _doAddAllListener = function () {
         var _list = document.getElementsByTagName('script');
-        for (var i = _list.length - 1, _script; i >= 0; i--) {
-            _script = _list[i];
-            if (!_script.xxx) {
-                _script.xxx = !0;
-                !_script.src ? _doClearStack()
-                    : _doAddListener(_list[i]);
-            }
+        for (var i = _list.length - 1; i >= 0; i--) {
+            _doAddListener(_list[i]);
         }
     };
     /*
@@ -194,7 +168,6 @@
         // load file
         __scache[_uri] = 0;
         var _script = _d.createElement('script');
-        _script.xxx = !0;
         _script.type = 'text/javascript';
         _script.charset = 'utf-8';
         _doAddListener(_script);
@@ -216,7 +189,7 @@
             _arr.unshift(_uri);
             _doDefine.apply(_g, _arr);
         }
-        // 404 is ok for platform
+        // change state
         if (!!_uri && __scache[_uri] != 1) {
             __scache[_uri] = 2;
         }
@@ -231,8 +204,7 @@
         if (!__xqueue.length) return;
         for (var i = __xqueue.length - 1, _item; i >= 0;) {
             _item = __xqueue[i];
-            if (__scache[_item.n] !== 2 &&
-                (!_isMapLoaded(_item.p) || !_isListLoaded(_item.h) || !_isListLoaded(_item.d))) {
+            if (__scache[_item.n] !== 2 && (!_isMapLoaded(_item.p) || !_isListLoaded(_item.h) || !_isListLoaded(_item.d))) {
                 i--;
                 continue;
             }
@@ -246,20 +218,8 @@
         // check circular reference
         if (__xqueue.length > 0 && _isFinishLoaded()) {
             var _item = __xqueue.pop();
-            console.warn('try to unlock circular reference -> ' + _item.n);
             _doExecFunction(_item);
             _doCheckLoading();
-        }
-    };
-    /*
-     * 清理函数定义缓存栈
-     * @return {Void}
-     */
-    var _doClearStack = function () {
-        var _args = __stack.pop();
-        while (!!_args) {
-            _doDefine.apply(p, _args);
-            _args = __stack.pop();
         }
     };
     /*
@@ -371,7 +331,6 @@
                 _doMergeResult(_item.n, _result);
             }
             __scache[_item.n] = 2;
-            console.log('do ' + _item.n);
         };
     })();
     /*
@@ -475,15 +434,12 @@
             _doCheckLoading();
         };
     })();
+
     var define = function (_uri, _deps, _callback) {
         var _args = [].slice.call(arguments, 0);
-
         __stack.push(_args);
         _doAddAllListener();
     };
 
-    // 入口方法
     _doInit();
-    console.log(_doFormatURI('lib!./canvas/framework'))
-
 })(document, window);

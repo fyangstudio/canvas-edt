@@ -1,3 +1,3 @@
 define(function () {
-    console.log(2);
+    window.test = 1;
 });
