@@ -82,12 +82,16 @@
             $json: function (_uri) {
                 console.log('json!');
             }
+        }, _reg2 = /([<>=]=?)/;
+        var _doParseVersion = function (_exp) {
+            return _exp.replace(_reg2, "'$1'");
         };
         return function (_uri) {
             var _brr = [],
                 _type = null,
                 _arr = _uri.split('!'),
                 _fun = _pmap[_arr[0].toLowerCase()];
+            console.log(_doParseVersion(_arr[0]))
             if (!!_fun) {
                 _type = _arr.shift();
             }
