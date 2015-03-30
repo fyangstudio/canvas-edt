@@ -1,6 +1,6 @@
 define([
     'lib!util/global',
-    '../canvas/framework'
+    'lib!canvas/framework'
 ], function (_g, fw) {
     var t = fw;
     t.r = 2;

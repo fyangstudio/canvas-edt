@@ -1,7 +1,6 @@
 define([
-    'lib!util/global',
-    'lib!hack/below-ie9'
-], function (_g, ie) {
+    'lib!util/global'
+], function (_g) {
     var t = {s: 1};
     return t;
 });

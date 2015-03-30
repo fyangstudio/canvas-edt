@@ -1,11 +1,22 @@
 (function (_d, _g) {
 
     // 配置载入方法
-    var __config = {site: {}}, // quick site config
+    var __sys = {},
+        __noop = function () {
+        },
+        __ua = navigator.userAgent.toLowerCase(), // userAgent
+        __config = {site: {}}, // quick site config
         __xqueue = [], // item:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
         __scache = {}, // state cache   0-loading  1-waiting  2-defined
         __rcache = {}, // result cache
         __stack = []; // for define stack
+
+    // 解析浏览器信息
+    if (window.ActiveXObject) __sys.ie = __ua.match(/msie ([\d.]+)/)[1];
+    else if (document.getBoxObjectFor) __sys.firefox = __ua.match(/firefox\/([\d.]+)/)[1];
+    else if (window.MessageEvent && !document.getBoxObjectFor) __sys.chrome = __ua.match(/chrome\/([\d.]+)/)[1];
+    else if (window.opera) __sys.opera = __ua.match(/opera.([\d.]+)/)[1];
+    else if (window.openDatabase) __sys.safari = __ua.match(/version\/([\d.]+)/)[1];
 
     // 工具函数
     var _helper = {
@@ -82,7 +93,7 @@
             $json: function (_uri) {
                 console.log('json!');
             }
-        }, _reg2 = /([<>=]=?)/;
+        }, _reg =/\$(.?)[><=]$ /,_reg2 = /([<>=]=?)/;
         var _doParseVersion = function (_exp) {
             return _exp.replace(_reg2, "'$1'");
         };
@@ -90,9 +101,13 @@
             var _brr = [],
                 _type = null,
                 _arr = _uri.split('!'),
-                _fun = _pmap[_arr[0].toLowerCase()];
-            console.log(_doParseVersion(_arr[0]))
-            if (!!_fun) {
+                _target = _arr[0],
+                _fun = _pmap[_target.toLowerCase()];
+            if (_arr.length > 1 && !__config.site[_target]) {
+                for (var _s in __sys) {
+                    if (__sys[_target.toLowerCase()]) _fun = '';
+                    else if (!_fun) _fun = __noop;
+                }
                 _type = _arr.shift();
             }
             _brr.push(_arr.join('!'));
