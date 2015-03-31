@@ -93,9 +93,24 @@
             $json: function (_uri) {
                 console.log('json!');
             }
-        }, _reg = /\$[^><=!]+/, _reg2 = /([<>=]=?)/;
-        var _doParseVersion = function (_exp) {
-            return _exp.replace(_reg2, "'$1'");
+        }, _reg1 = /\$[^><=!]+/;
+        var _doParseVersion = function (_exp, _sys) {
+            _exp = (_exp || '').replace(/\s/g, '').replace(_sys, 'PT');
+            var _arr, _left, _right, _reg = /([<>=]=?)/;
+            _arr = _exp.split('PT');
+            _exp = _exp.replace(_sys, '');
+            _left = "'" + _arr[0].replace(_reg, "'$1'") + "[VERSION]'";
+            _right = "'[VERSION]" + _arr[1].replace(_reg, "'$1'") + "'";
+            return (function () {
+                var _arr = ['true'];
+                if (!!_left) {
+                    _arr.push(_left.replace('[VERSION]', __sys[_sys]));
+                }
+                if (!!_right) {
+                    _arr.push(_right.replace('[VERSION]', __sys[_sys]));
+                }
+                return eval(_arr.join('&&'));
+            })();
         };
         return function (_uri) {
             var _brr = [],
@@ -104,12 +119,10 @@
                 _target = _arr[0],
                 _fun = _pmap[_target.toLowerCase()];
             if (_arr.length > 1 && !__config.site[_target]) {
-                var _temp = _arr.shift();
-                for (var _s in __sys) {
-                    var _sys = _target.match(_reg)[0];
-                    if (__sys[_sys]) _fun = '';
-                    else if (!_fun) _fun = __noop;
-                }
+                var _temp = _arr.shift(),
+                    _sys = _target.match(_reg1)[0];
+                if (__sys[_sys] && _doParseVersion(_target, _sys)) _fun = '';
+                else if (!_fun) _fun = __noop;
                 _type = _fun ? _temp : null;
             }
             _brr.push(_arr.join('!'));
