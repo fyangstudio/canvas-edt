@@ -12,11 +12,11 @@
         __stack = []; // for define stack
 
     // 解析浏览器信息
-    if (window.ActiveXObject) __sys.ie = __ua.match(/msie ([\d.]+)/)[1];
-    else if (document.getBoxObjectFor) __sys.firefox = __ua.match(/firefox\/([\d.]+)/)[1];
-    else if (window.MessageEvent && !document.getBoxObjectFor && __ua.indexOf('chrome') > 0) __sys.chrome = __ua.match(/chrome\/([\d.]+)/)[1];
-    else if (window.opera) __sys.opera = __ua.match(/opera.([\d.]+)/)[1];
-    else if (window.openDatabase) __sys.safari = __ua.match(/version\/([\d.]+)/)[1];
+    if (__ua.indexOf('chrome') > 0) __sys.$chrome = __ua.match(/chrome\/([\d.]+)/)[1];
+    else if (window.ActiveXObject) __sys.$ie = __ua.match(/msie ([\d.]+)/)[1];
+    else if (document.getBoxObjectFor) __sys.$firefox = __ua.match(/firefox\/([\d.]+)/)[1];
+    else if (window.openDatabase) __sys.$safari = __ua.match(/version\/([\d.]+)/)[1];
+    else if (window.opera) __sys.$opera = __ua.match(/opera.([\d.]+)/)[1];
 
     // 工具函数
     var _helper = {
@@ -93,7 +93,7 @@
             $json: function (_uri) {
                 console.log('json!');
             }
-        }, _reg = /\$(.?)[><=]$ /, _reg2 = /([<>=]=?)/;
+        }, _reg = /\$[^><=!]+/, _reg2 = /([<>=]=?)/;
         var _doParseVersion = function (_exp) {
             return _exp.replace(_reg2, "'$1'");
         };
@@ -106,7 +106,8 @@
             if (_arr.length > 1 && !__config.site[_target]) {
                 var _temp = _arr.shift();
                 for (var _s in __sys) {
-                    if (__sys[_target.toLowerCase()]) _fun = '';
+                    var _sys = _target.match(_reg)[0];
+                    if (__sys[_sys]) _fun = '';
                     else if (!_fun) _fun = __noop;
                 }
                 _type = _fun ? _temp : null;

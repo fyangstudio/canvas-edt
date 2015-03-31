@@ -1,6 +1,6 @@
 define([
     'lib!canvas/framework',
-    'chrome!./hack/below-ie9',
+    '$chrome>14!./hack/below-ie9',
     './side'
 ], function (fw, ie, sd) {
     console.log(fw);
