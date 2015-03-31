@@ -100,9 +100,9 @@
                 _left = "'" + _arr[0].replace(_reg, "'$1'") + "[VERSION]'",
                 _right = "'[VERSION]" + _arr[1].replace(_reg, "'$1'") + "'";
             return (function () {
-                var _res = ['true'];
-                if (!!_left) _res.push(_left.replace('[VERSION]', __sys[_sys]));
-                if (!!_right) _res.push(_right.replace('[VERSION]', __sys[_sys]));
+                var _res = ['true'], _ver = parseInt(__sys[_sys]);
+                if (!!_left) _res.push(_left.replace('[VERSION]', _ver));
+                if (!!_right) _res.push(_right.replace('[VERSION]', _ver));
                 return eval(_res.join('&&'));
             })();
         };
