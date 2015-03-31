@@ -93,7 +93,7 @@
             $json: function (_uri) {
                 console.log('json!');
             }
-        }, _reg =/\$(.?)[><=]$ /,_reg2 = /([<>=]=?)/;
+        }, _reg = /\$(.?)[><=]$ /, _reg2 = /([<>=]=?)/;
         var _doParseVersion = function (_exp) {
             return _exp.replace(_reg2, "'$1'");
         };
@@ -104,11 +104,12 @@
                 _target = _arr[0],
                 _fun = _pmap[_target.toLowerCase()];
             if (_arr.length > 1 && !__config.site[_target]) {
+                var _temp = _arr.shift();
                 for (var _s in __sys) {
                     if (__sys[_target.toLowerCase()]) _fun = '';
                     else if (!_fun) _fun = __noop;
                 }
-                _type = _arr.shift();
+                _type = _fun ? _temp : null;
             }
             _brr.push(_arr.join('!'));
             _brr.push(_fun || _doLoadScript);
