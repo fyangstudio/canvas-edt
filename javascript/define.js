@@ -14,7 +14,7 @@
     // 解析浏览器信息
     if (window.ActiveXObject) __sys.ie = __ua.match(/msie ([\d.]+)/)[1];
     else if (document.getBoxObjectFor) __sys.firefox = __ua.match(/firefox\/([\d.]+)/)[1];
-    else if (window.MessageEvent && !document.getBoxObjectFor) __sys.chrome = __ua.match(/chrome\/([\d.]+)/)[1];
+    else if (window.MessageEvent && !document.getBoxObjectFor && __ua.indexOf('chrome') > 0) __sys.chrome = __ua.match(/chrome\/([\d.]+)/)[1];
     else if (window.opera) __sys.opera = __ua.match(/opera.([\d.]+)/)[1];
     else if (window.openDatabase) __sys.safari = __ua.match(/version\/([\d.]+)/)[1];
 
