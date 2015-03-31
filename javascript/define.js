@@ -1,11 +1,10 @@
 (function (_d, _g) {
 
-    // 配置载入方法
-    var __sys = {},
+    var __sys = {}, // browser info
         __noop = function () {
-        },
+        }, // do nothing
         __ua = navigator.userAgent.toLowerCase(), // userAgent
-        __config = {site: {}}, // quick site config
+        __config = {site: {}, charset: 'utf-8'}, // quick site config
         __xqueue = [], // item:{n:'filename',d:[/* dependency list */],p:[/* platform list */],h:[/* patch list */],f:function}
         __scache = {}, // state cache   0-loading  1-waiting  2-defined
         __rcache = {}, // result cache
@@ -91,25 +90,20 @@
                 _doLoadText(_uri);
             },
             $json: function (_uri) {
-                console.log('json!');
+                // todo
             }
-        }, _reg1 = /\$[^><=!]+/;
+        };
         var _doParseVersion = function (_exp, _sys) {
             _exp = (_exp || '').replace(/\s/g, '').replace(_sys, 'PT');
-            var _arr, _left, _right, _reg = /([<>=]=?)/;
-            _arr = _exp.split('PT');
-            _exp = _exp.replace(_sys, '');
-            _left = "'" + _arr[0].replace(_reg, "'$1'") + "[VERSION]'";
-            _right = "'[VERSION]" + _arr[1].replace(_reg, "'$1'") + "'";
+            var _arr = _exp.split('PT'),
+                _reg = /([<>=]=?)/,
+                _left = "'" + _arr[0].replace(_reg, "'$1'") + "[VERSION]'",
+                _right = "'[VERSION]" + _arr[1].replace(_reg, "'$1'") + "'";
             return (function () {
-                var _arr = ['true'];
-                if (!!_left) {
-                    _arr.push(_left.replace('[VERSION]', __sys[_sys]));
-                }
-                if (!!_right) {
-                    _arr.push(_right.replace('[VERSION]', __sys[_sys]));
-                }
-                return eval(_arr.join('&&'));
+                var _res = ['true'];
+                if (!!_left) _res.push(_left.replace('[VERSION]', __sys[_sys]));
+                if (!!_right) _res.push(_right.replace('[VERSION]', __sys[_sys]));
+                return eval(_res.join('&&'));
             })();
         };
         return function (_uri) {
@@ -117,10 +111,11 @@
                 _type = null,
                 _arr = _uri.split('!'),
                 _target = _arr[0],
+                _reg = /\$[^><=!]+/,
                 _fun = _pmap[_target.toLowerCase()];
             if (_arr.length > 1 && !__config.site[_target]) {
                 var _temp = _arr.shift(),
-                    _sys = _target.match(_reg1)[0];
+                    _sys = _target.match(_reg)[0];
                 if (__sys[_sys] && _doParseVersion(_target, _sys)) _fun = '';
                 else if (!_fun) _fun = __noop;
                 _type = _fun ? _temp : null;
@@ -137,7 +132,7 @@
      * @return {String}      格式化后地址
      */
     var _doFormatURI = (function () {
-        var _xxx = !1,
+        var _addA = !1,
             _reg1 = /([^:])\/+/g,
             _reg2 = /[^\/]*$/,
             _reg3 = /\.js$/i,
@@ -146,8 +141,8 @@
             return _uri.indexOf('://') > 0;
         };
         var _append = function () {
-            if (_xxx) return;
-            _xxx = !0;
+            if (_addA) return;
+            _addA = !0;
             _anchor.style.display = 'none';
             document.body.appendChild(_anchor);
         };
@@ -159,18 +154,18 @@
             var _arr = _uri.split('!'),
                 _site = '',
                 _path = _uri,
-                _sufx = _reg3.test(_uri) ? '' : '.js';
+                _sufx = (_type || _reg3.test(_uri)  ) ? '' : '.js';
             if (_arr.length > 1) {
                 _site = __config.site[_arr.shift()];
                 _path = _arr.join('!');
             }
-            if (_type) _sufx = '';
             _uri = (_site + _path + _sufx).replace(_reg1, '$1/');
             _anchor.href = _uri;
             _uri = _anchor.href;
             return _absolute(_uri) && _uri.indexOf('./') < 0 ? _uri : _anchor.getAttribute('href', 4); // ie6/7
         };
         return function (_uri, _base, _type) {
+            if (!_uri) return '';
             if (_helper.isTypeOf(_uri, 'Array')) {
                 var _list = [];
                 for (var i = 0; i < _uri.length; i++) {
@@ -180,7 +175,6 @@
                 }
                 return _list;
             }
-            if (!_uri) return '';
             if (_absolute(_uri)) {
                 return _format(_uri, _type);
             }
@@ -232,7 +226,7 @@
         __scache[_uri] = 0;
         var _script = _d.createElement('script');
         _script.type = 'text/javascript';
-        _script.charset = 'utf-8';
+        _script.charset = __config.charset;
         _doAddListener(_script);
         _script.src = _uri;
         (_d.getElementsByTagName('head')[0] || document.body).appendChild(_script);
@@ -322,7 +316,7 @@
         if (!__xqueue.length) return;
         for (var i = __xqueue.length - 1, _item; i >= 0;) {
             _item = __xqueue[i];
-            if (__scache[_item.n] !== 2 && (!_isMapLoaded(_item.p) || !_isListLoaded(_item.h) || !_isListLoaded(_item.d))) {
+            if (__scache[_item.n] !== 2 && !_isListLoaded(_item.d)) {
                 i--;
                 continue;
             }
@@ -349,21 +343,6 @@
         if (!!_list && !!_list.length) {
             for (var i = _list.length - 1; i >= 0; i--) {
                 if (__scache[_list[i]] !== 2) {
-                    return !1;
-                }
-            }
-        }
-        return !0;
-    };
-    /*
-     * 检查集合是否都载入完成
-     * @param  {Object} 集合
-     * @return {Void}
-     */
-    var _isMapLoaded = function (_map) {
-        if (!!_map) {
-            for (var x in _map) {
-                if (__scache[_map[x]] !== 2) {
                     return !1;
                 }
             }
@@ -405,18 +384,13 @@
                 return !1;
             };
         // merge inject param
-        var _doMergeDI = function (_dep, _map) {
+        var _doMergeDI = function (_dep) {
             var _arr = [];
-            _map = _map || {}
             if (!!_dep) {
                 // merge dependency list result
-                for (var i = 0, l = _dep.length, _it; i < l; i++) {
-                    _it = _dep[i];
-                    if (!__rcache[_it] && !_map[_it]) {
-                        __rcache[_it] = {};
-                    }
-                    // result of (platform.js || platform.patch.js)
-                    _arr.push(__rcache[_it] || __rcache[_map[_it]] || {});
+                for (var i = 0, l = _dep.length; i < l; i++) {
+                    // result of
+                    _arr.push(__rcache[_dep[i]] || {});
                 }
             }
             _arr.push({}, _o, _f, _r);
@@ -424,7 +398,7 @@
         };
         var _doMergeResult = function (_uri, _result) {
             var _ret = __rcache[_uri],
-                _iso = {}.toString.call(_result) == '[object Object]';
+                _iso = _helper.isTypeOf(_result, 'Object');
             if (!!_result) {
                 if (!_ret || !_iso) {
                     // for other type of return
@@ -440,9 +414,7 @@
             __rcache[_uri] = _ret;
         };
         return function (_item) {
-            var _args = _doMergeDI(
-                _item.d, _item.p
-            );
+            var _args = _doMergeDI(_item.d);
             if (!!_item.f) {
                 var _result = _item.f.apply(_g, _args) ||
                     _args[_args.length - 4];
@@ -491,8 +463,7 @@
      * @return {Void}
      */
     var _doDefine = (function () {
-        var _seed = +new Date,
-            _keys = ['d', 'h'];
+        var _seed = +new Date;
         var _doComplete = function (_list, _base) {
             if (!_list || !_list.length) return;
             for (var i = 0, l = _list.length, _it; i < l; i++) {
@@ -514,37 +485,32 @@
             if (__scache[_uri] === 2) {
                 return; // duplication
             }
-            var _pths;
             // complete relative uri
             _doComplete(_deps, _uri);
             __scache[_uri] = 1;
             // push to load queue
             var _xmap = {
                 n: _uri, d: _deps,
-                h: _pths, f: _callback
+                f: _callback
             };
             __xqueue.push(_xmap);
             // load dependence
-            for (var i = 0, l = _keys.length, _it, _list; i < l; i++) {
-                _it = _keys[i];
-                _list = _xmap[_it];
-                if (!!_list && !!_list.length) {
-                    var _kmap = {};
-                    for (var k = 0, j = _list.length, _itt, _itm, _arr, _type; k < j; k++) {
-                        _itt = _list[k];
-                        if (!_itt) {
-                            console.warn('empty dep uri for ' + _uri);
-                        }
-                        // 0 - url
-                        // 1 - load function
-                        // 2 - resource type
-                        _arr = _doParsePlugin(_itt);
-                        _itm = _doFormatURI(_arr[0], _uri, _arr[2]);
-                        _list[k] = _itm;
-                        _arr[1](_itm);
+            var _list = _xmap.d;
+            if (!!_list && !!_list.length) {
+                for (var k = 0, j = _list.length, _itt, _itm, _arr; k < j; k++) {
+                    _itt = _list[k];
+                    if (!_itt) {
+                        console.warn('empty dep uri for ' + _uri);
                     }
-
+                    // 0 - url
+                    // 1 - load function
+                    // 2 - resource type
+                    _arr = _doParsePlugin(_itt);
+                    _itm = _doFormatURI(_arr[0], _uri, _arr[2]);
+                    _list[k] = _itm;
+                    _arr[1](_itm);
                 }
+
             }
             // check state
             _doCheckLoading();
