@@ -1,85 +1,87 @@
-define(function (_p) {
-    var _f = function () {
-    };
-    var _extpro = Function.prototype;
+define(function () {
+
     /**
-     * AOP增强操作，增强操作接受一个输入参数包含以下信息
+     *字符串前后空白去除
+     * @return {String}         - 去除空白后的字符串
      *
-     *  | 参数名称 | 参数类型  | 参数描述 |
-     *  | :--     | :--      | :-- |
-     *  | args    | Array    | 函数调用时实际输入参数，各增强操作中可以改变值后将影响至后续的操作 |
-     *  | value   | Variable | 输出结果 |
-     *  | stopped | Boolean  | 是否结束操作，终止后续操作 |
-     *
-     * @method external:Function#_$aop
-     * @param  {Function} arg0 - 前置操作，接受一个输入参数，见描述信息
-     * @param  {Function} arg1 - 后置操作，接受一个输入参数，见描述信息
-     * @return {Function}        增强后操作函数
      */
-    _extpro._$aop = function (_before, _after) {
-        var _after = _after || _f,
-            _before = _before || _f,
-            _handler = this;
-        return function () {
-            var _event = {args: _r.slice.call(arguments, 0)};
-            _before(_event);
-            if (!_event.stopped) {
-                _event.value = _handler.apply(this, _event.args);
-                _after(_event);
-            }
-            return _event.value;
-        };
-    };
+    String.prototype._$trim = function () {
+        return this.replace(/(^\s*)|(\s*$)/g, "");
+    }
+
     /**
-     * 绑定接口及参数，使其的调用对象保持一致
+     *当前函数this拓展
+     * @param  {Object}    arg0 - 函数内this
+     * @return {Function}       - 绑定后的函数
      *
-     *  ```javascript
-     *  var scope = {a:0};
-     *
-     *  var func = function(a,b){
-     *      // 第一个参数 ：1
-     *      console.log(a);
-     *      // 第二个参数 ： 2
-     *      consoel.log(b);
-     *      // 当前this.a ： 0
-     *      console.log(this.a);
-     *  };
-     *
-     *  func._$bind(scope,"1")(2);
-     *  ```
-     *
-     * @method external:Function#_$bind
-     * @see    external:Function#_$bind2
-     * @param  {Object} arg0 - 需要保持一致的对象，null表示window对象，此参数外的其他参数作为绑定参数
-     * @return {Function}      返回绑定后的函数
      */
-    _extpro._$bind = function () {
-        var _args = arguments,
-            _object = arguments[0],
-            _function = this;
+    Function.prototype._$bind = function () {
+        var
+            _r = [], // 参数集
+            _args = arguments, // 获取参数
+            _object = arguments[0], // 获取目标
+            _function = this; // this赋值
+
+        // 参数绑定
         return function () {
-            // not use slice for chrome 10 beta and Array.apply for android
             var _argc = _r.slice.call(_args, 1);
             _r.push.apply(_argc, arguments);
             return _function.apply(_object || null, _argc);
         };
-    };
-    // for compatiable
-    var _extpro = String.prototype;
-    if (!_extpro.trim) {
-        _extpro.trim = (function () {
-            var _reg = /(?:^\s+)|(?:\s+$)/g;
-            return function () {
-                return this.replace(_reg, '');
-            };
-        })();
-    }
-    if (!this.console) {
-        this.console = {
-            log: _f,
-            error: _f
-        };
     }
 
-    return _p;
-});
+    /**
+     *数组遍历 return false中断
+     * @param  {Function}  arg0 - 回调函数
+     * @param  {Object}    arg1 - 回调函数内this 可空
+     *
+     * ```javascript
+     * [1,2,3,4,5]._$(function (value, index, array) {
+     *     //something
+     *     if(index == 3) return false;
+     * })
+     * ```
+     *
+     */
+    Array.prototype._$forEach = function (_callback, _thisArg) {
+        if (this == null || {}.toString.call(_callback) != "[object Function]") {
+            return false;
+        }
+        for (var i = 0, __len = this.length; i < __len; i++) {
+            if (_callback.call(_thisArg, this[i], i, this) === false) break;
+        }
+    };
+
+    /**
+     *修复低版本(IE 6,7) Object.keys 不能遍历问题
+     * @param  {Object}    arg0 - 取键值的目标对象
+     *
+     * ```javascript
+     * console.log(Object.keys({a:1,b:2,c:3}));
+     * // [a,b,c]
+     * ```
+     *
+     */
+    var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
+        hasOwn = ({}).hasOwnProperty;
+    for (var i in {
+        toString: 1
+    }) {
+        DONT_ENUM = false;
+    }
+    Object.keys = Object.keys || function (obj) {//ecma262v5 15.2.3.14
+        var result = [];
+        for (var key in obj) if (hasOwn.call(obj, key)) {
+            result.push(key)
+        }
+        if (DONT_ENUM && obj) {
+            for (var i = 0; key = DONT_ENUM[i++];) {
+                if (hasOwn.call(obj, key)) {
+                    result.push(key);
+                }
+            }
+        }
+        return result;
+    };
+
+})

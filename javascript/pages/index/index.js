@@ -15,6 +15,5 @@ define([
     };
     console.log(ie);
     console.log(fw);
-    console.log(window.test);
     _pro.__init();
 });
