@@ -83,5 +83,16 @@ define(function ($p, $f, $w) {
         }
         return result;
     };
+    /**
+     *修复低版本(IE 6,7) console报错问题
+     *
+     */
+    if (!this.console) {
+        this.console = {
+            log: $f,
+            warn: $f,
+            error: $f
+        };
+    }
 
 })
