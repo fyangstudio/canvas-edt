@@ -511,9 +511,27 @@
             _doCheckLoading();
         };
     })();
-
+    /*
+     * 查找当前执行的脚本 for ie
+     * @return {Node} 当前执行脚本
+     */
+    var _doFindScriptRunning = function () {
+        var _list = document.getElementsByTagName('script');
+        for (var i = _list.length - 1, _script; i >= 0; i--) {
+            _script = _list[i];
+            if (_script.readyState == 'interactive')
+                return _script;
+        }
+    };
     var define = function (_uri, _deps, _callback) {
-        var _args = [].slice.call(arguments, 0);
+        var _args = [].slice.call(arguments, 0),
+            _script = _doFindScriptRunning();
+        // for ie check running script
+        if (!!_script) {
+            var _src = _script.src;
+            if (!!_src) _args.unshift(_doFormatURI(_src));
+            return _doDefine.apply(_g, _args);
+        }
         __stack.push(_args);
         _doAddAllListener();
     };
