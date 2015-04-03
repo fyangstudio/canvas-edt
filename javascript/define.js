@@ -496,9 +496,7 @@
             if (!!_list && !!_list.length) {
                 for (var k = 0, j = _list.length, _itt, _itm, _arr; k < j; k++) {
                     _itt = _list[k];
-                    if (!_itt) {
-                        console.warn('empty dep uri for ' + _uri);
-                    }
+                    if (!_itt) return;
                     // 0 - url
                     // 1 - load function
                     // 2 - resource type

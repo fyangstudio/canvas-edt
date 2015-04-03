@@ -1,14 +1,15 @@
 define([
     'lib!/util/klass'
-], function (k) {
+], function (k, $p, $f, $w) {
+
+    var _pro;
     // 定义类基类_$$Module
-    var p = {};
-    p._$$Module = k._$klass();
-    var pro = p._$$Module.prototype;
+    $p._$$Module = k._$klass();
+    _pro = $p._$$Module.prototype;
     // 初始化
-    pro.__init = function () {
+    _pro.__init = function () {
         console.log('base class!');
     };
 
-    return p;
+    return $p;
 });
