@@ -1,10 +1,8 @@
 define([
     './util.js',
-], function (_u, _p) {
-    _f = function () {
-    };
+], function (_u, $p, $f, $w) {
 
-    _p._$klass = (function () {
+    $p._$klass = (function () {
         var _isNotFunction = function () {
             return {}.toString.call(arguments[0]) !== '[object Function]';
         };
@@ -28,7 +26,7 @@ define([
             var _Klass = function () {
                 return this.__init.apply(this, arguments);
             };
-            _Klass.prototype.__init = _f;
+            _Klass.prototype.__init = $f;
             _Klass._$extend = function (_super, _static) {
                 if (_isNotFunction(_super)) {
                     return;
@@ -93,5 +91,5 @@ define([
         };
     })();
 
-    return _p;
+    return $p;
 });

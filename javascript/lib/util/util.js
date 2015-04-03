@@ -1,7 +1,7 @@
 define([
     './global.js',
-], function (_g, _p) {
-    _p.__forIn = function (_obj, _callback, _this) {
+], function (_g, $p, $f, $w) {
+    $p.__forIn = function (_obj, _callback, _this) {
         if (!_obj || !_callback) {
             return null;
         }
@@ -18,5 +18,5 @@ define([
         }
         return null;
     };
-    return _p;
+    return $p;
 })

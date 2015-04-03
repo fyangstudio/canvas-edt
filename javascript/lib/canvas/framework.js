@@ -1,6 +1,6 @@
 define([
     'lib!util/global'
-], function (_g) {
-    var t = {s: 1};
-    return t;
+], function (_g, $p, $f, $w) {
+    $p = {s: 1};
+    return $p;
 });

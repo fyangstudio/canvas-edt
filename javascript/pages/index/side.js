@@ -1,5 +1,5 @@
 define([
     '$text!./side.html'
-], function (tpl) {
+], function (tpl, $p, $f, $w) {
     console.log(tpl);
 });

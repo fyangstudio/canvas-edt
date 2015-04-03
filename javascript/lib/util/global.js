@@ -1,4 +1,4 @@
-define(function () {
+define(function ($p, $f, $w) {
 
     /**
      *字符串前后空白去除
@@ -69,7 +69,7 @@ define(function () {
     }) {
         DONT_ENUM = false;
     }
-    Object.keys = Object.keys || function (obj) {//ecma262v5 15.2.3.14
+    Object.keys = Object.keys || function (obj) {
         var result = [];
         for (var key in obj) if (hasOwn.call(obj, key)) {
             result.push(key)

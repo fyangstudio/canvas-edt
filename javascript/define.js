@@ -378,11 +378,8 @@
      */
     var _doExecFunction = (function () {
         // dependency inject param
-        var _o = {},
-            _r = [],
-            _f = function () {
-                return !1;
-            };
+        var $w = _g,
+            $f = __noop;
         // merge inject param
         var _doMergeDI = function (_dep) {
             var _arr = [];
@@ -393,7 +390,7 @@
                     _arr.push(__rcache[_dep[i]] || {});
                 }
             }
-            _arr.push({}, _o, _f, _r);
+            _arr.push({}, $f, $w);
             return _arr;
         };
         var _doMergeResult = function (_uri, _result) {
