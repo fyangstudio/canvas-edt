@@ -65,6 +65,7 @@
         for (var i = _list.length - 1, _script, _uri; i >= 0; i--) {
             _script = _list[i];
             _uri = _script.src;
+            _script.xxx = !0;
             if (_reg.test(_uri)) {
                 var _arr = _uri.split(/[?#]/);
                 var _site = __config.site, _obj = _helper.str2obj(_arr[1]);
@@ -209,8 +210,13 @@
      */
     var _doAddAllListener = function () {
         var _list = document.getElementsByTagName('script');
-        for (var i = _list.length - 1; i >= 0; i--) {
-            _doAddListener(_list[i]);
+        for (var i = _list.length - 1, _script; i >= 0; i--) {
+            _script = _list[i];
+            if (!_script.xxx) {
+                _script.xxx = !0;
+                !_script.src ? _doClearStack()
+                    : _doAddListener(_list[i]);
+            }
         }
     };
     /*
@@ -225,6 +231,7 @@
         // load file
         __scache[_uri] = 0;
         var _script = _d.createElement('script');
+        _script.xxx = !0;
         _script.type = 'text/javascript';
         _script.charset = __config.charset;
         _doAddListener(_script);
@@ -250,8 +257,10 @@
         if (!!_uri && __scache[_uri] != 1) {
             __scache[_uri] = 2;
         }
-        _doClearScript(_script);
+
         _doCheckLoading();
+        _doClearScript(_script);
+
     };
     /*
      * 载入依赖文本
@@ -521,6 +530,17 @@
             _script = _list[i];
             if (_script.readyState == 'interactive')
                 return _script;
+        }
+    };
+    /*
+     * 清理函数定义缓存栈
+     * @return {Void}
+     */
+    var _doClearStack = function () {
+        var _args = __stack.pop();
+        while (!!_args) {
+            _doDefine.apply(p, _args);
+            _args = __stack.pop();
         }
     };
     var define = function (_uri, _deps, _callback) {
