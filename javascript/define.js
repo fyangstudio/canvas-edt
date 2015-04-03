@@ -364,7 +364,7 @@
      */
     var _isFinishLoaded = function () {
         for (var x in __scache)
-            if (__scache[x] === 0)
+            if (__scache[x] != 2)
                 return !1;
         return !0;
     };
