@@ -36,6 +36,10 @@ define([
 
     pptpl.template = function () {
 
+        var _data = pptpl.options.data;
+
+        setTimeout(function(){console.log(_data.info.name)}, 1000);
+
         // 模板变量声明叠加
         var prefix = '';
 

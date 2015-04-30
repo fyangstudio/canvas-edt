@@ -87,8 +87,8 @@ define(function ($p, $f, $w) {
      *修复低版本(IE 6,7) console报错问题
      *
      */
-    if (!this.console) {
-        this.console = {
+    if (!$w.console) {
+        $w.console = {
             log: $f,
             warn: $f,
             error: $f

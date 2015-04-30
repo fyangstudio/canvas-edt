@@ -37,6 +37,7 @@ define([
         this.__super();
         console.log('child class');
         console.log(tpl(__tpl, data));
+        data.info.name = 'Jason';
     };
     //console.log($w)
     //console.log(ie);
