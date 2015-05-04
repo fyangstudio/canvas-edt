@@ -13,35 +13,35 @@
 <textarea id="tpl1" style="display:none;">
     {{!有用户信息!}}
     {{#if !!info}}
-    <p>你好，{{info.name}}！</p>
-    {{#if !!info.vip }}
-    {{#if info.level < 5}}
-    <p>普通会员</p>
-    {{#elseif info.level >= 5 && info.level < 8}}
-    <p>中级会员</p>
-    {{#else}}
-    <p>高级会员</p>
-    {{/if}}
-    {{#else}}
-    <p>普通用户</p>
-    {{/if}}
+        <p>你好，{{info.name}}！</p>
+        {{#if !!info.vip }}
+            {{#if info.level < 5}}
+            <p>普通会员</p>
+            {{#elseif info.level >= 5 && info.level < 8}}
+            <p>中级会员</p>
+            {{#else}}
+            <p>高级会员</p>
+            {{/if}}
+        {{#else}}
+            <p>普通用户</p>
+        {{/if}}
     <h3>阅读历史：{{books.length}}</h3>
     {{!遍历阅读历史!}}
     {{#list books as book}}
-    {{#if book.read}}
-    {{book.name}}：已读
-    {{#else}}
-    {{book.name}}：未读
-    {{/if}}
-    {{#if !!book.note}}
-    {{#list book.note as n}}
-    {{#if n._index < 2}}
-    {{n}}
-    {{#else}}
-    更多 >>
-    {{/if}}
-    {{/list}}
-    {{/if}}
+        {{#if book.read}}
+            {{book.name}}：已读
+        {{#else}}
+            {{book.name}}：未读
+        {{/if}}
+        {{#if !!book.note}}
+            {{#list book.note as n}}
+                {{#if n._index < 2}}
+                    {{n}}
+                {{#else}}
+                    更多 >>
+                {{/if}}
+            {{/list}}
+        {{/if}}
     {{/list}}
     <h3>购买信息：{{orders.length}}</h3>
     <table border="1">
