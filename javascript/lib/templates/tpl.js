@@ -38,7 +38,15 @@ define([
 
         var _data = pptpl.options.data;
 
-        setTimeout(function(){console.log(_data.info.name)}, 1000);
+        setTimeout(function () {
+            console.log(_data.info.name)
+        }, 1000);
+
+        this.parseHTML = function (_data) {
+            var tmp = document.createElement("div");
+            tmp.innerHTML = _data;
+            return tmp.childNodes;
+        }
 
         // 模板变量声明叠加
         var prefix = '';
@@ -103,8 +111,15 @@ define([
             prefix += '"; _out += "'
         }
 
-        var _render = new Function('_data', _convert.replace(/<%innerFunction%>/g, prefix + _tpl));
-        return _render.call(this, pptpl.options.data);
+        var tpl = _convert.replace(/<%innerFunction%>/g, prefix + _tpl);
+
+        var _render = new Function('_data', tpl);
+
+        var _result = _render.call(this, pptpl.options.data);
+
+        console.log(this.parseHTML(_result))
+
+        return _result
     }
 
     return pptpl;
