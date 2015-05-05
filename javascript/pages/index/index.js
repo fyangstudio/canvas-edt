@@ -35,8 +35,8 @@ define([
     _pro.__init = function () {
         // 调用_$$Module的初始化逻辑
         this.__super();
-        console.log('child class');
-        console.log(tpl(__tpl, data));
+        //console.log('child class');
+        //console.log(tpl(__tpl, data));
         data.info.name = 'Jason';
     };
     //console.log($w)

@@ -17,6 +17,39 @@ define([
         elseifStart: /{{#elseif\s*([^}]*?)}}/igm
     }
 
+    var $tpl = function (param) {
+        return new $tpl.fn.__init(param);
+    }
+
+    $tpl.fn = $tpl.prototype = {
+
+        constructor: $tpl,
+
+        __init: function (param) {
+            if (param.init) param.init();
+            this.tpl = param.template;
+            this.data = param.data || {};
+
+            console.log(param.data)
+        },
+
+        $inject: function () {
+
+        }
+    }
+
+    $tpl.fn.__init.prototype = $tpl.fn;
+
+    $tpl({
+        template: '',
+        init: function () {
+            this.data = '111';
+        },
+        test: function () {
+
+        }
+    })
+
     var pptpl = function (_tpl, _data) {
 
         var _tplArr = _tpl.split('\n');
@@ -116,8 +149,6 @@ define([
         var _render = new Function('_data', tpl);
 
         var _result = _render.call(this, pptpl.options.data);
-
-        console.log(this.parseHTML(_result))
 
         return _result
     }
