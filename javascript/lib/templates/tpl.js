@@ -90,9 +90,11 @@ define([
     var pptpl = function (_tpl, _data) {
 
         var _tplArr = _tpl.split('\n');
-        for (var i = 0, l = _tplArr.length; i < l; i++) {
-            _tplArr[i] = _tplArr[i].replace(/(^\s*)|(\s*$)/g, '');
-        }
+
+        _tplArr.forEach(function (_tplOne, i) {
+            _tplArr[i] = _tplOne.trim();
+        })
+
         _tpl = (_tplArr.join('') || _tpl).replace(/&lt;/igm, '<').replace(/&gt;/igm, '>').replace(/&amp;/igm, '&').replace(/"/igm, "'");
 
         pptpl.options = {

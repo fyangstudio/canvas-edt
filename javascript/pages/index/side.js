@@ -19,5 +19,5 @@ define([
             {id: '1002', goods: "book2", state: "已发货"}
         ]
     };
-    //console.log($tpl(tpl, data));
+    console.log($tpl(tpl, data));
 });

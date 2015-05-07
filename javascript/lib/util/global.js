@@ -37,8 +37,10 @@ define(function ($p, $f, $w) {
      * @return {String}         - 去除空白后的字符串
      *
      */
-    String.prototype.$trim = function () {
-        return this.replace(/(^\s*)|(\s*$)/g, "");
+    if (!String.prototype.trim) {
+        String.prototype.trim = function () {
+            return this.replace(/^\s+|\s+$/g, '');
+        };
     }
 
     /**
@@ -63,26 +65,42 @@ define(function ($p, $f, $w) {
     }
 
     /**
-     *数组遍历 return false中断
+     *数组遍历
      * @param  {Function}  arg0 - 回调函数
      * @param  {Object}    arg1 - 回调函数内this 可空
      *
      * ```javascript
-     * [1,2,3,4,5]._$(function (value, index, array) {
+     * [1,2,3,4,5].forEach(function (value, index, array) {
      *     //something
-     *     if(index == 3) return false;
      * })
      * ```
      *
      */
-    Array.prototype.$forEach = function (_callback, _thisArg) {
-        if (this == null || {}.toString.call(_callback) != "[object Function]") {
-            return false;
-        }
-        for (var i = 0, __len = this.length; i < __len; i++) {
-            if (_callback.call(_thisArg, this[i], i, this) === false) break;
-        }
-    };
+    if (!Array.prototype.forEach) {
+
+        Array.prototype.forEach = function forEach(callback, thisArg) {
+
+            var T, k = 0;
+
+            if (this == null) throw new TypeError("this is null or not defined");
+            if (!$p.$isFunction(callback)) throw new TypeError(callback + " is not a function");
+
+            var O = Object(this);
+            var len = O.length >>> 0;
+
+            if (thisArg) T = thisArg;
+
+            while (k < len) {
+
+                var kValue;
+                if (Object.prototype.hasOwnProperty.call(O, k)) {
+                    kValue = O[k];
+                    callback.call(T, kValue, k, O);
+                }
+                k++;
+            }
+        };
+    }
 
     /**
      *修复低版本(IE 6,7) Object.keys 不能遍历问题
@@ -101,7 +119,7 @@ define(function ($p, $f, $w) {
     }) {
         DONT_ENUM = false;
     }
-    Object.$keys = Object.keys || function (obj) {
+    Object.keys = Object.keys || function (obj) {
         var result = [];
         for (var key in obj) if (hasOwn.call(obj, key)) {
             result.push(key)
