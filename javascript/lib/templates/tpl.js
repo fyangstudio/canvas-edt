@@ -20,28 +20,27 @@ define([
 
     var _clone = function (obj) {
 
-        if (null == obj || "object" != typeof obj) {
-            return obj;
-        }
+        if (null == obj || "object" != typeof obj) return obj;
 
         var copy = obj.constructor();
-
         for (var attr in obj) {
             copy[attr] = obj[attr];
         }
-
         return copy;
     }
-    var isDiff = function (a, b) {
+
+    var _isDiff = function (a, b) {
 
         if (typeof a != "object" || typeof b != "object") return !a === b;
         else {
-            if (_g.$isArray(a)) for (var i = 0; i < a.length; i++) if (b[i] === undefined) return true;
+            // first traversal
+            if (_g.$isArray(a)) for (var i = 0, al = a.length; i < al; i++) if (b[i] === undefined) return true;
             else for (var i in a) if (a.hasOwnProperty(i)) if (b[i] === undefined) return true;
-
-            if (_g.$isArray(b)) for (var j = 0; j < b.length; j++) if (a[j] === undefined) return true;
+            // second traversal
+            if (_g.$isArray(b)) for (var j = 0, bl = b.length; j < bl; j++) if (a[j] === undefined) return true;
             else for (var j in b) if (b.hasOwnProperty(j)) if (a[j] === undefined) return true;
         }
+        // they are same
         return false;
     };
 
@@ -60,7 +59,7 @@ define([
             this.data = _clone(param.data) || {};
 
 
-            console.log(isDiff(this.data, param.data))
+            console.log(_isDiff(this.data, param.data))
         },
 
         $update: function () {
@@ -113,10 +112,15 @@ define([
             console.log(_data.info.name)
         }, 1000);
 
-        this.parseHTML = function (_data) {
-            var tmp = document.createElement("div");
-            tmp.innerHTML = _data;
-            return tmp.childNodes;
+        this.parseHTML = function (_html) {
+            var _reg = /<(.*?)(?=\s|>)/i, // first tag name
+                _tmap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
+            var _tag;
+            if (_reg.test(_html)) _tag = _tmap[(RegExp.$1 || '').toLowerCase()] || '';
+            var _div = document.createElement(_tag || 'div');
+            _div.innerHTML = _html;
+            var _list = _div.childNodes;
+            return _list.length > 1 ? _div : _list[0];
         }
 
         // 模板变量声明叠加
