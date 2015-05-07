@@ -44,10 +44,10 @@ define([
         return false;
     };
 
-
     var $tpl = function (param) {
         return new $tpl.fn._init(param);
     }
+    console.log(_g.$parseHTML('<li>xxx</li><li>xxx</li>'))
 
     $tpl.fn = $tpl.prototype = {
 
@@ -111,17 +111,6 @@ define([
         setTimeout(function () {
             console.log(_data.info.name)
         }, 1000);
-
-        this.parseHTML = function (_html) {
-            var _reg = /<(.*?)(?=\s|>)/i, // first tag name
-                _tmap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
-            var _tag;
-            if (_reg.test(_html)) _tag = _tmap[(RegExp.$1 || '').toLowerCase()] || '';
-            var _div = document.createElement(_tag || 'div');
-            _div.innerHTML = _html;
-            var _list = _div.childNodes;
-            return _list.length > 1 ? _div : _list[0];
-        }
 
         // 模板变量声明叠加
         var prefix = '';

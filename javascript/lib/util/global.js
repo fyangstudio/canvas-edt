@@ -19,6 +19,19 @@ define(function ($p, $f, $w) {
     // @return {Boolean}          是否是function
     $p.$isFunction = _isType("Function");
 
+    // @return {node}             字符串转HTML
+    $p.$parseHTML = function (txt) {
+        if (!txt) return;
+        var _reg = /<(.*?)(?=\s|>)/i, // first tag name
+            _parentNodeMap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
+        var _tag;
+        if (_reg.test(txt)) _tag = _parentNodeMap[(RegExp.$1 || '').toLowerCase()] || '';
+        var _cnt = document.createElement(_tag || 'div');
+        _cnt.innerHTML = txt;
+        var _list = _cnt.childNodes;
+        return _list.length > 1 ? _cnt : _list[0];
+    }
+
     /**
      *字符串前后空白去除
      * @return {String}         - 去除空白后的字符串
