@@ -1,11 +1,30 @@
 define(function ($p, $f, $w) {
 
+    // 类型判断
+    function _isType(type) {
+        return function (obj) {
+            return {}.toString.call(obj) == "[object " + type + "]";
+        }
+    }
+
+    // @return {Boolean}          是否是object
+    $p.$isObject = _isType("Object");
+
+    // @return {Boolean}          是否是string
+    $p.$isString = _isType("String");
+
+    // @return {Boolean}          是否是array
+    $p.$isArray = Array.isArray || _isType("Array");
+
+    // @return {Boolean}          是否是function
+    $p.$isFunction = _isType("Function");
+
     /**
      *字符串前后空白去除
      * @return {String}         - 去除空白后的字符串
      *
      */
-    String.prototype._$trim = function () {
+    String.prototype.$trim = function () {
         return this.replace(/(^\s*)|(\s*$)/g, "");
     }
 
@@ -15,7 +34,7 @@ define(function ($p, $f, $w) {
      * @return {Function}       - 绑定后的函数
      *
      */
-    Function.prototype._$bind = function () {
+    Function.prototype.$bind = function () {
         var
             _r = [], // 参数集
             _args = arguments, // 获取参数
@@ -43,7 +62,7 @@ define(function ($p, $f, $w) {
      * ```
      *
      */
-    Array.prototype._$forEach = function (_callback, _thisArg) {
+    Array.prototype.$forEach = function (_callback, _thisArg) {
         if (this == null || {}.toString.call(_callback) != "[object Function]") {
             return false;
         }
@@ -69,7 +88,7 @@ define(function ($p, $f, $w) {
     }) {
         DONT_ENUM = false;
     }
-    Object.keys = Object.keys || function (obj) {
+    Object.$keys = Object.keys || function (obj) {
         var result = [];
         for (var key in obj) if (hasOwn.call(obj, key)) {
             result.push(key)
@@ -95,4 +114,5 @@ define(function ($p, $f, $w) {
         };
     }
 
+    return $p;
 })

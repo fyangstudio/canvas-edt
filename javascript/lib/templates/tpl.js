@@ -1,6 +1,7 @@
 define([
-    'lib!util/global'
-], function (_g, $p, $f, $w) {
+    'lib!util/global',
+    'lib!/util/klass'
+], function (_g, k, $p, $f, $w) {
 
     // “全局变量”统计
     var _variables = [];
@@ -17,38 +18,75 @@ define([
         elseifStart: /{{#elseif\s*([^}]*?)}}/igm
     }
 
+    var _clone = function (obj) {
+
+        if (null == obj || "object" != typeof obj) {
+            return obj;
+        }
+
+        var copy = obj.constructor();
+
+        for (var attr in obj) {
+            copy[attr] = obj[attr];
+        }
+
+        return copy;
+    }
+    var isDiff = function (a, b) {
+
+        if (typeof a != "object" || typeof b != "object") return !a === b;
+        else {
+            if (_g.$isArray(a)) for (var i = 0; i < a.length; i++) if (b[i] === undefined) return true;
+            else for (var i in a) if (a.hasOwnProperty(i)) if (b[i] === undefined) return true;
+
+            if (_g.$isArray(b)) for (var j = 0; j < b.length; j++) if (a[j] === undefined) return true;
+            else for (var j in b) if (b.hasOwnProperty(j)) if (a[j] === undefined) return true;
+        }
+        return false;
+    };
+
+
     var $tpl = function (param) {
-        return new $tpl.fn.__init(param);
+        return new $tpl.fn._init(param);
     }
 
     $tpl.fn = $tpl.prototype = {
 
         constructor: $tpl,
 
-        __init: function (param) {
-            if (param.init) param.init();
+        _init: function (param) {
+            if (_g.$isFunction(param.$init)) param.$init();
             this.tpl = param.template;
-            this.data = param.data || {};
+            this.data = _clone(param.data) || {};
 
-            console.log(param.data)
+
+            console.log(isDiff(this.data, param.data))
         },
 
-        $inject: function () {
+        $update: function () {
 
+        },
+
+        $extend: function () {
+
+        },
+
+        $inject: function (selector) {
+            console.log(selector)
         }
     }
 
-    $tpl.fn.__init.prototype = $tpl.fn;
+    $tpl.fn._init.prototype = $tpl.fn;
 
     $tpl({
         template: '',
-        init: function () {
-            this.data = '111';
+        $init: function () {
+            this.data = {a: 1, b: 2, c: 3};
         },
         test: function () {
 
         }
-    })
+    }).$inject('#test')
 
     var pptpl = function (_tpl, _data) {
 
@@ -154,4 +192,5 @@ define([
     }
 
     return pptpl;
-});
+})
+;
