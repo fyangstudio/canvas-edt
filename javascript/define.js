@@ -321,64 +321,76 @@
      * 搜索循环引用
      * @return {Object} 需解环项
      */
-    var _doFindCircularRef = (function(){
+    var _doFindCircularRef = (function () {
         var _result;
-        var _index = function(_array,_name){
-            for(var i=_array.length-1;i>=0;i--)
-                if (_array[i].n==_name)
+        var _index = function (_array, _name) {
+            for (var i = _array.length - 1; i >= 0; i--)
+                if (_array[i].n == _name)
                     return i;
             return -1;
         };
-        var _loop = function(_item){
+        var _loop = function (_item) {
             if (!_item) return;
-            var i = _index(_result,_item.n);
-            if (i>=0) return _item;
+            var i = _index(_result, _item.n);
+            if (i >= 0) return _item;
             _result.push(_item);
             var _deps = _item.d;
-            if (!_deps||!_deps.length) return;
-            for(var i=0,l=_deps.length,_citm;i<l;i++){
-                _citm = _loop(__xqueue[_index(__xqueue,_deps[i])]);
-                if (!!_citm) return _citm;
+            if (!_deps || !_deps.length) return;
+            for (var i = 0, l = _deps.length, _citm; i < l; i++) {
+                _citm = _loop(__xqueue[_index(__xqueue, _deps[i])]);
+                // blew ie9 check for depends resource loaded
+                if (!!_citm) {
+                    var _citmdes = _citm.d;
+                    if (!!_citmdes && !!_citmdes.length) {
+                        for (var j = _citmdes.length - 1; j >= 0; j--) {
+                            if (__scache[_citmdes[i]] !== 2) {
+                                return _citmdes[i];
+                            }
+                        }
+                    }
+                    return _citm;
+                }
             }
         };
-        var _exec = function(_list,_pmap){
+        var _exec = function (_list, _pmap) {
             if (!_pmap) return;
             // find platform patch list
             var _arr = [];
-            for(var i=0,l=_list.length,_it;i<l;i++){
+            for (var i = 0, l = _list.length, _it; i < l; i++) {
                 _it = _list[i];
-                if (_pmap[_it]){
+                if (_pmap[_it]) {
                     _arr.push(_it);
                 }
             }
             // index queue by file name
             var _map = {};
-            for(var i=0,l=__xqueue.length,_it;i<l;i++){
+            for (var i = 0, l = __xqueue.length, _it; i < l; i++) {
                 _it = __xqueue[i];
                 _map[_it.n] = _it;
             }
             // execute platform patch
-            for(var i=0,l=_arr.length,_it,_item;i<l;i++){
+            for (var i = 0, l = _arr.length, _it, _item; i < l; i++) {
                 _it = _arr[i];
                 // exec hack.js
                 _item = _map[_it];
-                if (!!_item){
+                if (!!_item) {
                     _doExecFunction(_item);
+                    console.log("!!!" + _item.n)
                 }
                 // exec hack.patch.js
                 _item = _map[_pmap[_it]];
-                if (!!_item){
+                if (!!_item) {
                     _doExecFunction(_item);
                 }
             }
         };
-        return function(){
+        return function () {
             _result = [];
             // check from begin to end
             var _item = _loop(__xqueue[0]);
             // must do platform before excute
-            if (!!_item){
-                _exec(_item.d,_item.p);
+            if (!!_item) {
+                _exec(_item.d, _item.p);
             }
             return _item;
         };
@@ -404,7 +416,7 @@
         }
         // check circular reference
         if (__xqueue.length > 0 && _isFinishLoaded()) {
-        	var _item = _doFindCircularRef()||__xqueue.pop();
+            var _item = _doFindCircularRef() || __xqueue.pop();
             _doExecFunction(_item);
             _doCheckLoading();
         }
@@ -493,7 +505,7 @@
                 _doMergeResult(_item.n, _result);
             }
             __scache[_item.n] = 2;
-            console.log('do ' + _item.n);
+            //console.log('do ' + _item.n);
         };
     })();
     /*
