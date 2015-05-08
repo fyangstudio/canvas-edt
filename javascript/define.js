@@ -375,7 +375,6 @@
                 _item = _map[_it];
                 if (!!_item) {
                     _doExecFunction(_item);
-                    console.log("!!!" + _item.n)
                 }
                 // exec hack.patch.js
                 _item = _map[_pmap[_it]];
@@ -505,7 +504,7 @@
                 _doMergeResult(_item.n, _result);
             }
             __scache[_item.n] = 2;
-            //console.log('do ' + _item.n);
+            console.log('do ' + _item.n);
         };
     })();
     /*
