@@ -32,6 +32,36 @@ define(function ($p, $f, $w) {
         return _list.length > 1 ? _cnt : _list[0];
     }
 
+    // 编码函数
+    var _encode = function (_map, _content) {
+        _content = '' + _content;
+        if (!_map || !_content) {
+            return _content || '';
+        }
+        return _content.replace(_map.r, function ($1) {
+            var _result = _map[!_map.i ? $1.toLowerCase() : $1];
+            return _result != null ? _result : $1;
+        });
+    };
+
+    $p.$escape = function (_content) {
+        var _map = {
+            r: /\<|\>|\&|\r|\n|\s|\'|\"/g,
+            '<': '&lt;', '>': '&gt;', '&': '&amp;', ' ': '&nbsp;',
+            '"': '&quot;', "'": '&#39;', '\n': '<br/>', '\r': ''
+        };
+        return _encode(_map, _content);
+    };
+
+    $p.$unescape = function (_content) {
+        var _map = {
+            r: /\&(?:lt|gt|amp|nbsp|#39|quot)\;|\<br\/\>/gi,
+            '&lt;': '<', '&gt;': '>', '&amp;': '&', '&nbsp;': ' ',
+            '&#39;': "'", '&quot;': '"', '<br/>': '\n'
+        };
+        return _encode(_map, _content);
+    };
+
     /**
      *字符串前后空白去除
      * @return {String}         - 去除空白后的字符串
@@ -49,18 +79,26 @@ define(function ($p, $f, $w) {
      * @return {Function}       - 绑定后的函数
      *
      */
-    Function.prototype.$bind = function () {
-        var
-            _r = [], // 参数集
-            _args = arguments, // 获取参数
-            _object = arguments[0], // 获取目标
-            _function = this; // this赋值
+    if (!Function.prototype.bind) {
+        Function.prototype.bind = function (oThis) {
+            if (typeof this !== "function") {
+                // closest thing possible to the ECMAScript 5 internal IsCallable function
+                throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+            }
 
-        // 参数绑定
-        return function () {
-            var _argc = _r.slice.call(_args, 1);
-            _r.push.apply(_argc, arguments);
-            return _function.apply(_object || null, _argc);
+            var aArgs = Array.prototype.slice.call(arguments, 1),
+                fToBind = this,
+                fNOP = function () {
+                },
+                fBound = function () {
+                    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis || window,
+                        aArgs.concat(Array.prototype.slice.call(arguments)));
+                };
+
+            fNOP.prototype = this.prototype;
+            fBound.prototype = new fNOP();
+
+            return fBound;
         };
     }
 

@@ -2,7 +2,7 @@ define([
     '$text!./side.html',
     'lib!templates/tpl',
 ], function (tpl, $tpl, $p, $f, $w) {
-    var data = {
+    var _data = {
         info: {
             name: 'Yangfan',
             vip: true,
@@ -19,5 +19,15 @@ define([
             {id: '1002', goods: "book2", state: "已发货"}
         ]
     };
-    console.log($tpl(tpl, data));
+
+    $tpl({
+        template: tpl,
+        $init: function () {
+            this.data = _data;
+        },
+        test: function () {
+
+        }
+    }).$inject('#test')
+
 });
