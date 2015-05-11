@@ -20,18 +20,17 @@ define([
 
     var _clone = function (obj) {
 
-        if (null == obj || "object" != typeof obj) return obj;
+        if (null == obj || !_g.$isObject(obj)) return obj;
 
         var copy = obj.constructor();
-        for (var attr in obj) {
-            copy[attr] = obj[attr];
-        }
+        for (var attr in obj) copy[attr] = obj[attr];
+
         return copy;
     }
 
     var _isDiff = function (a, b) {
 
-        if (typeof a != "object" || typeof b != "object") return !a === b;
+        if (_g.$isObject(a) || _g.$isObject(b)) return !a === b;
         else {
             // first traversal
             if (_g.$isArray(a)) for (var i = 0, al = a.length; i < al; i++) if (b[i] === undefined) return true;
