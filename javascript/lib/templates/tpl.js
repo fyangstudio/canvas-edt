@@ -3,9 +3,6 @@ define([
     'lib!/util/klass'
 ], function (_g, k, $p, $f, $w) {
 
-    // “全局变量”统计
-    var _variables = [];
-
     // 方法匹配
     var _settings = {
         listStart: /{{#list\s*([^}]*?)\s*as\s*(\w*?)\s*(,\s*\w*?)?}}/igm,
@@ -43,10 +40,84 @@ define([
         return false;
     };
 
+    var _makeTemplate = function (_tpl) {
+
+        var _variables = [], _tplArr = _tpl.split('\n');
+
+        _tplArr.forEach(function (_tplOne, i) {
+            _tplArr[i] = _tplOne.trim();
+        })
+
+        var _tmp = _g.$unescape(_tplArr.join('') || _tpl).replace(/"/igm, "'");
+
+        // 模板变量声明叠加
+        var prefix = '', _counter = 0,
+            _convert = ' \
+                "use strict"; \
+                var _out = ""; \
+                try { \
+                    <%innerFunction%>"; \
+                    return _out; \
+                } catch(e) {throw new Error("pptpl: "+e.message);}';
+
+        var _html = _tmp
+
+            // comment expression
+            .replace(_settings.comment, '')
+
+            // list expression
+            .replace(_settings.listStart, function ($, _target, _object) {
+                var _var = _object || 'value';
+                var _key = 'key' + _counter++;
+                if (!_target.match(/\./g))_variables.push(_target);
+                if (_target.match(/(\w+?)\[/g)) _variables.push(_target.match(/(\w+?)\[/g)[0].replace('[', ''));
+                return '";~function() { ' +
+                    'var i' + _counter + ' = 0;' +
+                    'for(var ' + _key + ' in ' + _target + ') {' +
+                    'if(' + _target + '.hasOwnProperty(' + _key + ')) {' +
+                    'var _i = i' + _counter + '++;' +
+                    'var _v = ' + _target + '[' + _key + ']; ' +
+                    'var ' + _var + ' = typeof( _v ) === "object" ? _v : [_v];' + _var + '._index = _i' +
+                    '; _out += "'
+            })
+            .replace(_settings.listEnd, '";}}}(); _out += "')
+
+            // if expression
+            .replace(_settings.ifStart, function ($, _condition) {
+                return '"; if(' + _condition + ') { _out+="';
+            })
+            .replace(_settings.ifEnd, '";}_out+="')
+
+            // else expression
+            .replace(_settings.elseStart, function ($) {
+                return '"; } else { _out+="';
+            })
+
+            // else if expression
+            .replace(_settings.elseifStart, function ($, condition) {
+                return '"; } else if(' + condition + ') { _out+="';
+            })
+
+            // interpolate expression
+            .replace(_settings.interpolate, function ($, _name) {
+                _variables.push(_name.split('.')[0])
+                return '"; _out+=' + _name + '; _out += "';
+            });
+
+        // tpl parse
+        for (var i = 0, l = _variables.length; i < l; i++) {
+            var _variable = _variables[i].replace(/\[.+\]/g, '');
+            prefix += 'var ' + _variable + ' = _data.' + _variable + (i == l - 1 ? '||"' : '||"";');
+        }
+
+        if (_html.indexOf('"') > 0) prefix += '"; _out += "'
+        var _result = _convert.replace(/<%innerFunction%>/g, prefix + _html);
+        return new Function('_data', _result);
+    }
+
     var $tpl = function (param) {
         return new $tpl.fn._init(param);
     }
-    console.log(_g.$parseHTML('<li>xxx</li><li>xxx</li>'))
 
     $tpl.fn = $tpl.prototype = {
 
@@ -54,90 +125,16 @@ define([
 
         _init: function (param) {
             if (_g.$isFunction(param.$init)) param.$init();
-            this.tpl = param.template;
+            this.tpl = param.template || '';
             this.data = _clone(param.data) || {};
 
-            // 待优化
-            var _tplArr = this.tpl.split('\n');
+            this._dataCache = this.data;
+            if (!this.tpl) throw new Error("template is null or not defined");
 
-            _tplArr.forEach(function (_tplOne, i) {
-                _tplArr[i] = _tplOne.trim();
-            })
+            this._tplFactory = _makeTemplate(this.tpl);
+            console.log(this._tplFactory(this.data));
 
-            var _tpl = _g.$unescape(_tplArr.join('') || this.tpl).replace(/"/igm, "'");
-
-            // 模板变量声明叠加
-            var prefix = '';
-
-            // 循环调用统计
-            var _counter = 0;
-
-            // 模板编译 主结构
-            var _convert = '"use strict"; var _out = "";try { <%innerFunction%>";return _out;} catch(e) {throw new Error("pptpl: "+e.message);}';
-
-            var _html = _tpl
-
-                // comment expression
-                .replace(_settings.comment, '')
-
-                // list expression
-                .replace(_settings.listStart, function ($, _target, _object) {
-                    var _var = _object || 'value';
-                    var _key = 'key' + _counter++;
-                    if (!_target.match(/\./g))_variables.push(_target);
-                    if (_target.match(/(\w+?)\[/g)) _variables.push(_target.match(/(\w+?)\[/g)[0].replace('[', ''));
-                    return '";~function() { ' +
-                        'var i' + _counter + ' = 0;' +
-                        'for(var ' + _key + ' in ' + _target + ') {' +
-                        'if(' + _target + '.hasOwnProperty(' + _key + ')) {' +
-                        'var _i = i' + _counter + '++;' +
-                        'var _v = ' + _target + '[' + _key + ']; ' +
-                        'var ' + _var + ' = typeof( _v ) === "object" ? _v : [_v];' + _var + '._index = _i' +
-                        '; _out += "'
-                })
-                .replace(_settings.listEnd, '";}}}(); _out += "')
-
-                // if expression
-                .replace(_settings.ifStart, function ($, _condition) {
-                    return '"; if(' + _condition + ') { _out+="';
-                })
-                .replace(_settings.ifEnd, '";}_out+="')
-
-                // else expression
-                .replace(_settings.elseStart, function ($) {
-                    return '"; } else { _out+="';
-                })
-
-                // else if expression
-                .replace(_settings.elseifStart, function ($, condition) {
-                    return '"; } else if(' + condition + ') { _out+="';
-                })
-
-                // interpolate expression
-                .replace(_settings.interpolate, function ($, _name) {
-                    _variables.push(_name.split('.')[0])
-                    return '"; _out+=' + _name + '; _out += "';
-                });
-
-            // tpl parse
-            for (var i = 0, l = _variables.length; i < l; i++) {
-                var _variable = _variables[i].replace(/\[.+\]/g, '');
-                prefix += 'var ' + _variable + ' = _data.' + _variable + (i == l - 1 ? '||"' : '||"";');
-            }
-
-            if (_html.indexOf('"') > 0) {
-                prefix += '"; _out += "'
-            }
-
-            var tpl = _convert.replace(/<%innerFunction%>/g, prefix + _html);
-
-            var _render = new Function('_data', tpl);
-
-            var _result = _render.call(this, this.data);
-
-            console.log(_result)
-
-
+            return this;
         },
 
         $update: function () {
