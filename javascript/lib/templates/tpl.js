@@ -25,21 +25,6 @@ define([
         return copy;
     }
 
-    var _isDiff = function (a, b) {
-
-        if (_g.$isObject(a) || _g.$isObject(b)) return !a === b;
-        else {
-            // first traversal
-            if (_g.$isArray(a)) for (var i = 0, al = a.length; i < al; i++) if (b[i] === undefined) return true;
-            else for (var i in a) if (a.hasOwnProperty(i)) if (b[i] === undefined) return true;
-            // second traversal
-            if (_g.$isArray(b)) for (var j = 0, bl = b.length; j < bl; j++) if (a[j] === undefined) return true;
-            else for (var j in b) if (b.hasOwnProperty(j)) if (a[j] === undefined) return true;
-        }
-        // they are same
-        return false;
-    };
-
     var _makeTemplate = function (_tpl) {
 
         var _variables = [], _tplArr = _tpl.split('\n');
@@ -125,20 +110,31 @@ define([
 
         _init: function (param) {
             if (_g.$isFunction(param.$init)) param.$init();
-            this.tpl = param.template || '';
+            this.template = param.template || '';
             this.data = _clone(param.data) || {};
 
-            this._dataCache = this.data;
-            if (!this.tpl) throw new Error("template is null or not defined");
+            this._dataCache = _clone(this.data);
+            if (!this.template) throw new Error('template is null or not defined!');
 
-            this._tplFactory = _makeTemplate(this.tpl);
-            console.log(this._tplFactory(this.data));
+            this._tplFactory = _makeTemplate(this.template);
+            this._tpl = this._creatDom();
 
             return this;
         },
 
-        $update: function () {
+        _creatDom: function () {
 
+            // parse function todo
+            return _g.$parseHTML(this._tplFactory(this.data));
+        },
+
+        $update: function () {
+            this._tpl = this._creatDom();
+            if (!!this._node) {
+                this._node.innerHTML = '';
+                this._node.appendChild(this._tpl);
+            }
+            return this;
         },
 
         $extend: function () {
@@ -146,7 +142,12 @@ define([
         },
 
         $inject: function (selector) {
-            console.log(selector)
+            var _node = _g.dom.get(selector)[0]
+            if (!_node) throw new Error('inject node is null or not defined!');
+            this._node = _node;
+            _node.innerHTML = '';
+            _node.appendChild(this._tpl);
+            return this;
         }
     }
 
@@ -154,4 +155,3 @@ define([
 
     return $tpl;
 })
-;

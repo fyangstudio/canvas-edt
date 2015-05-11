@@ -20,7 +20,7 @@ define([
         ]
     };
 
-    $tpl({
+    var tpl = $tpl({
         template: tpl,
         $init: function () {
             this.data = _data;
@@ -28,6 +28,11 @@ define([
         test: function () {
 
         }
-    }).$inject('#test')
+    }).$inject('#test');
+
+    setTimeout(function () {
+        tpl.data.info.name = 'PP';
+        tpl.$update();
+    }, 1000);
 
 });
