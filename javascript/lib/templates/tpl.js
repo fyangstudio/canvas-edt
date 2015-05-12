@@ -8,6 +8,7 @@ define([
         listStart: /{{#list\s*([^}]*?)\s*as\s*(\w*?)\s*(,\s*\w*?)?}}/igm,
         listEnd: /{{\/list}}/igm,
         interpolate: /{{([\s\S]+?)}}/igm,
+        eventReg: /on-(\w+)\s*=\s*{{([\s\S]+?)}}/igm,
         comment: /{{!([^}]*?)!}}/igm,
         ifStart: /{{#if\s*([^}]*?)}}/igm,
         ifEnd: /{{\/if}}/igm,
@@ -43,7 +44,7 @@ define([
                 try { \
                     <%innerFunction%>"; \
                     return _out; \
-                } catch(e) {throw new Error("pptpl: "+e.message);}';
+                } catch(e) {throw new Error("$tpl: "+e.message);}';
 
         var _html = _tmp
 
@@ -83,6 +84,11 @@ define([
                 return '"; } else if(' + condition + ') { _out+="';
             })
 
+            // event expression
+            .replace(_settings.eventReg, function ($, _event, _fn) {
+                return 'tplEvent = ";_out+="' + _event + '"  ;_out+=" tplFn = ' + _fn;
+            })
+
             // interpolate expression
             .replace(_settings.interpolate, function ($, _name) {
                 _variables.push(_name.split('.')[0])
@@ -97,6 +103,7 @@ define([
 
         if (_html.indexOf('"') > 0) prefix += '"; _out += "'
         var _result = _convert.replace(/<%innerFunction%>/g, prefix + _html);
+        console.log(_html)
         return new Function('_data', _result);
     }
 
@@ -110,6 +117,7 @@ define([
 
         _init: function (param) {
             if (_g.$isFunction(param.$init)) param.$init();
+            this.param = param;
             this.template = param.template || '';
             this.data = _clone(param.data) || {};
 
@@ -125,7 +133,7 @@ define([
         _creatDom: function () {
 
             // parse function todo
-            return _g.$parseHTML(this._tplFactory(this.data));
+            return _g.$parseHTML(this._tplFactory.call(this.param, this.data));
         },
 
         $update: function () {

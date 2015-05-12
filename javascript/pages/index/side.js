@@ -10,9 +10,9 @@ define([
             area: 'Hangzhou'
         },
         books: [
-            {name: 'JavaScript高级程序设计', read: true, note: [' 笔记 ', ' 笔记笔记 ', ' 笔记笔记笔记 ']},
-            {name: 'Node.js实战', read: true, note: [' 笔记 ', ' 笔记笔记 ']},
-            {name: 'Java程序设计', read: false}
+            {id: 1, name: 'JavaScript高级程序设计', read: true, note: [' 笔记 ', ' 笔记笔记 ', ' 笔记笔记笔记 ']},
+            {id: 2, name: 'Node.js实战', read: true, note: [' 笔记 ', ' 笔记笔记 ']},
+            {id: 3, name: 'Java程序设计', read: false}
         ],
         orders: [
             {id: '1001', goods: "book1", state: "未发货"},

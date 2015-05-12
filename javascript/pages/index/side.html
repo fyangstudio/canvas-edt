@@ -17,9 +17,9 @@
     {{!遍历阅读历史!}}
     {{#list books as book}}
         {{#if book.read}}
-            {{book.name}}：已读
+            <p on-click={{this.test(book.id,'sss',1)}}>{{book.name}}：已读</p>
         {{#else}}
-            {{book.name}}：未读
+            <p>{{book.name}}：未读</p>
         {{/if}}
         {{#if !!book.note}}
             {{#list book.note as n}}
