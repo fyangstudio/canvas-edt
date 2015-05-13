@@ -86,6 +86,16 @@ define([
 
             // event expression
             .replace(_settings.eventReg, function ($, _event, _fn) {
+                var _reg = /\((.*?)\)/i;
+                if (_reg.test(_fn)) {
+                    var _arr = RegExp.$1.split(',');
+                    _arr.forEach(function (param) {
+                        if (param.indexOf("'") < 0 && isNaN(param)) {
+                            _variables.push(param.split('.')[0]);
+                            _fn = _fn.replace(param, '";_out+=' + param + ';_out+="');
+                        }
+                    })
+                }
                 return 'tplEvent = ";_out+="' + _event + '"  ;_out+=" tplFn = ' + _fn;
             })
 
@@ -103,7 +113,6 @@ define([
 
         if (_html.indexOf('"') > 0) prefix += '"; _out += "'
         var _result = _convert.replace(/<%innerFunction%>/g, prefix + _html);
-        console.log(_html)
         return new Function('_data', _result);
     }
 
