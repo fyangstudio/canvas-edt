@@ -40,10 +40,30 @@ define([
         var prefix = '', _counter = 0,
             _convert = ' \
                 "use strict"; \
+                var _tpl = {}; \
                 var _out = ""; \
+                var _event = [];\
                 try { \
+                    var _eventCount = 0;\
                     <%innerFunction%>"; \
-                    return _out; \
+                    _out = _helper.$parseHTML(_out); \
+                    var _fragment = document.createDocumentFragment(); \
+                    _fragment.appendChild(_out); \
+                    var _cnt = _fragment.childNodes[0]; \
+                    if(!!_cnt){\
+                        var _list = _cnt.getElementsByTagName("*");\
+                        for (var i = 0, n = _list.length; i < n; i++) {\
+                            var _o = _list[i];\
+                            var _tmp = _o.getAttribute("tpl_event");\
+                            if(_tmp){\
+                                var _rxp = /@p([0-9]*)/igm; \
+                                _event[_tmp].F.replace(_rxp, function($, _a){\
+                                    console.log(_event[_tmp].P);\
+                                })\
+                            }\
+                        }\
+                    }\
+                    return _fragment; \
                 } catch(e) {throw new Error("$tpl: "+e.message);}';
 
         var _html = _tmp
@@ -89,14 +109,18 @@ define([
                 var _reg = /\((.*?)\)/i;
                 if (_reg.test(_fn)) {
                     var _arr = RegExp.$1.split(',');
+                    var _pArr = [];
+                    var _pCount = 0;
                     _arr.forEach(function (param) {
                         if (param.indexOf("'") < 0 && isNaN(param)) {
                             _variables.push(param.split('.')[0]);
-                            _fn = _fn.replace(param, '";_out+=' + param + ';_out+="');
+                            _pArr.push(param);
+                            _fn = _fn.replace(param, '@P' + _pCount++);
                         }
                     })
                 }
-                return 'tplEvent = ";_out+="' + _event + '"  ;_out+=" tplFn = ' + _fn;
+                return '";_out+="tpl_event="+(_eventCount++); _event.push({E: "' + _event + '", F: "' + _fn + '", P: ' + _pArr + '}); _out += "';
+                //return 'tplEvent = ";_out+="' + _event + '"  ;_out+=" tplFn = ' + _fn;
             })
 
             // interpolate expression
@@ -113,7 +137,8 @@ define([
 
         if (_html.indexOf('"') > 0) prefix += '"; _out += "'
         var _result = _convert.replace(/<%innerFunction%>/g, prefix + _html);
-        return new Function('_data', _result);
+        console.log(_result)
+        return new Function('_data, _helper', _result);
     }
 
     var $tpl = function (param) {
@@ -142,7 +167,8 @@ define([
         _creatDom: function () {
 
             // parse function todo
-            return _g.$parseHTML(this._tplFactory.call(this.param, this.data));
+            var _tpl = this._tplFactory.call(this.param, this.data, _g);
+            return _tpl;
         },
 
         $update: function () {

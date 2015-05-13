@@ -25,8 +25,8 @@ define([
         $init: function () {
             this.data = _data;
         },
-        test: function () {
-
+        test: function (_id) {
+            console.log(_id);
         }
     }).$inject('#test');
 

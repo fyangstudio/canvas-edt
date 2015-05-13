@@ -1,5 +1,7 @@
 define(function ($p, $f, $w) {
 
+    var doc = document;
+
     // 类型判断
     function _isType(type) {
         return function (obj) {
@@ -62,7 +64,21 @@ define(function ($p, $f, $w) {
         return _encode(_map, _content);
     };
 
-    var doc = document;
+    if (doc.addEventListener) {
+        $p.addEvent = function (node, type, fn) {
+            node.addEventListener(type, fn, false);
+        }
+        $p.removeEvent = function (node, type, fn) {
+            node.removeEventListener(type, fn, false)
+        }
+    } else {
+        $p.addEvent = function (node, type, fn) {
+            node.attachEvent('on' + type, fn);
+        }
+        $p.removeEvent = function (node, type, fn) {
+            node.detachEvent('on' + type, fn);
+        }
+    }
 
     function api(query, context) {
 
