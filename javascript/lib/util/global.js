@@ -38,7 +38,7 @@ define(function ($p, $f, $w) {
     $p.$clone = function (target, deep) {
 
         var cloned, _deep = !!deep, cloneObject = arguments.callee;
-        if (!!target.nodeType) target.cloneNode(_deep);
+        if (!!target.nodeType) return target.cloneNode(_deep);
         if (target === null || target === undefined || !this.$isObject(target)) return target;
 
         if (this.$isArray(target)) {

@@ -31,6 +31,8 @@ define([
         }
     }).$inject('#test');
 
+    console.log(_g.$clone(document.getElementById('test'), true));
+
     setTimeout(function () {
         tpl.data.info.name = 'PP';
         tpl.$update();
