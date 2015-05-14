@@ -2,6 +2,22 @@ define(function ($p, $f, $w) {
 
     var doc = document;
 
+    if (doc.addEventListener) {
+        $p.$addEvent = function (node, type, fn) {
+            node.addEventListener(type, fn, false);
+        }
+        $p.$removeEvent = function (node, type, fn) {
+            node.removeEventListener(type, fn, false)
+        }
+    } else {
+        $p.$addEvent = function (node, type, fn) {
+            node.attachEvent('on' + type, fn);
+        }
+        $p.$removeEvent = function (node, type, fn) {
+            node.detachEvent('on' + type, fn);
+        }
+    }
+
     // 类型判断
     function _isType(type) {
         return function (obj) {
@@ -33,7 +49,7 @@ define(function ($p, $f, $w) {
         _cnt.innerHTML = txt;
         var _list = _cnt.childNodes;
         return _list.length > 1 ? _cnt : _list[0];
-    }
+    };
 
     // clone
     $p.$clone = function (target, deep) {
@@ -53,9 +69,10 @@ define(function ($p, $f, $w) {
         cloned = {};
         for (var i in target)cloned[i] = _deep ? cloneObject(target[i], true) : target[i];
         return cloned;
-    }
+    };
 
-    // same ps: in this function Array as Object so use type
+    // same
+    // ps: in this function Array as Object so use type
     $p.$same = function (target1, target2, deep) {
 
         var _deep = !!deep, check = arguments.callee;
@@ -88,6 +105,32 @@ define(function ($p, $f, $w) {
         return true;
     };
 
+    var _hash = window.location.hash;
+
+    // hash
+    $p.$hash = function (value) {
+        if (value != undefined) window.location.hash = value;
+        return window.location.hash;
+    };
+
+    $p.$watchHash = function (callback) {
+        if ($p.$isFunction(callback)) {
+            if (('onhashchange' in window) && ((typeof document.documentMode === 'undefined') || document.documentMode == 8)) {
+                $p.$addEvent(window, 'hashchange', function () {
+                    _hash = $p.$hash();
+                    callback(_hash);
+                })
+            } else {
+                setInterval(function () {
+                    if (window.location.hash != _hash) {
+                        _hash = $p.$hash();
+                        callback(_hash);
+                    }
+                }, 150);
+            }
+        }
+    }
+
     // 编码函数
     var _encode = function (_map, _content) {
         _content = '' + _content;
@@ -117,22 +160,6 @@ define(function ($p, $f, $w) {
         };
         return _encode(_map, _content);
     };
-
-    if (doc.addEventListener) {
-        $p.$addEvent = function (node, type, fn) {
-            node.addEventListener(type, fn, false);
-        }
-        $p.$removeEvent = function (node, type, fn) {
-            node.removeEventListener(type, fn, false)
-        }
-    } else {
-        $p.$addEvent = function (node, type, fn) {
-            node.attachEvent('on' + type, fn);
-        }
-        $p.$removeEvent = function (node, type, fn) {
-            node.detachEvent('on' + type, fn);
-        }
-    }
 
     function api(query, context) {
 

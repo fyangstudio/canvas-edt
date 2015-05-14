@@ -28,9 +28,17 @@ define([
         },
         test: function (_id, _s, _tmp) {
             if (_tmp) this.data.info.name = 'PP' + _id + _s;
+            _g.$hash(_id);
         }
     }).$inject('#test');
 
+
+    _g.$watchHash(function () {
+        alert(2)
+    })
+    _g.$watchHash(function () {
+        alert(3)
+    })
 
     var t1 = {a: [1, 2, 3], b: {1: 1, 2: 2}, c: 1};
     var t2 = {a: [1, 2, 3], b: {1: 1, 2: 2}, c: 1};
