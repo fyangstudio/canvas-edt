@@ -26,10 +26,8 @@ define([
         $init: function () {
             this.data = _data;
         },
-        test: function (_id) {
-            console.log(_id);
-            tpl.data.info.name = 'PP';
-            tpl.$update();
+        test: function (_id, _s, _tmp) {
+            if (_tmp) this.data.info.name = 'PP' + _id + _s;
         }
     }).$inject('#test');
 

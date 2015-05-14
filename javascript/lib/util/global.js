@@ -23,6 +23,7 @@ define(function ($p, $f, $w) {
 
     // @return {node}             字符串转HTML
     $p.$parseHTML = function (txt) {
+
         if (!txt) return;
         var _reg = /<(.*?)(?=\s|>)/i, // first tag name
             _parentNodeMap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
@@ -39,9 +40,9 @@ define(function ($p, $f, $w) {
 
         var cloned, _deep = !!deep, cloneObject = arguments.callee;
         if (!!target.nodeType) return target.cloneNode(_deep);
-        if (target === null || target === undefined || !this.$isObject(target)) return target;
+        if (target === null || target === undefined || typeof(target) !== 'object') return target;
 
-        if (this.$isArray(target)) {
+        if ($p.$isArray(target)) {
             if (!_deep) return target;
 
             cloned = [];
@@ -71,7 +72,7 @@ define(function ($p, $f, $w) {
                 if (target1[p] === target2[p]) continue;
 
                 // Numbers, Strings, Functions, Booleans must be strictly equal
-                if (typeof( target1[p] ) !== "object") return false;
+                if (typeof( target1[p] ) !== 'object') return false;
 
                 // Objects and Arrays must be tested recursively
                 if (_deep && !check(target1[p], target2[p])) {
@@ -81,7 +82,7 @@ define(function ($p, $f, $w) {
         }
 
         for (p in target2) {
-            // allows target1[ p ] to be set to undefined
+            // allows target1["p"] to be set to undefined
             if (target2.hasOwnProperty(p) && !target1.hasOwnProperty(p)) return false;
         }
         return true;

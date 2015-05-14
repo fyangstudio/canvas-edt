@@ -37,7 +37,7 @@ define([
                 try { \
                     <%innerFunction%>"; \
                     var _result = _render.bind(this); \
-                    return _result(_out, "tpl_event", _event, _helper); \
+                    return _result(_out, "tpl_event", _event, _helper, _dataCache); \
                 } catch(e) {throw new Error("$tpl: "+e.message);}';
 
         var _html = _tmp
@@ -110,7 +110,7 @@ define([
 
         if (_html.indexOf('"') > 0) prefix += '"; _out += "';
         var _result = _convert.replace(/<%innerFunction%>/g, prefix + _html);
-        return new Function('_data, _helper, _render', _result);
+        return new Function('_data, _dataCache, _helper, _render', _result);
     }
 
     var $tpl = function (param) {
@@ -124,12 +124,12 @@ define([
         _init: function (param) {
 
             if (_g.$isFunction(param.$init)) param.$init();
-            param.$update = this.$update;
+            param.$update = this.$update.bind(this);
 
             this.param = param;
             this.template = param.template || '';
             this.data = _g.$clone(param.data) || {};
-            this._dataCache = _g.$clone(this.data);
+            this._dataCache = _g.$clone(this.data, true);
             if (!this.template) throw new Error('template is null or not defined!');
 
             this._tplFactory = _makeTemplate(this.template);
@@ -141,7 +141,7 @@ define([
         _creatDom: function () {
 
             // parse tpl and add event function
-            var _render = function (_html, _target, _event, _u) {
+            var _render = function (_html, _target, _event, _u, _dataCache) {
                 var _node = _u.$parseHTML(_html);
                 var _fragment = document.createDocumentFragment();
                 _fragment.appendChild(_node);
@@ -157,6 +157,7 @@ define([
                                 return function ($event) {
                                     var _f = new Function("$event, tpl_P", _o.F);
                                     _f.call(this, $event, _o.P);
+                                    if (!_u.$same(_dataCache, this.data, true)) this.$update();
                                 }.bind(this)
                             }.bind(this))(_o));
                             _n.removeAttribute(_target);
@@ -166,17 +167,20 @@ define([
                 return _fragment;
             }
 
-            var _tpl = this._tplFactory.call(this.param, this.data, _g, _render);
+            var _tpl = this._tplFactory.apply(this.param, [this.data, this._dataCache, _g, _render]);
             return _tpl;
         },
 
         $update: function () {
+
+            // auto
+            //this._dataCache = _g.$clone(this.data, true);
+
             this._tpl = this._creatDom();
             if (!!this._node) {
                 this._node.innerHTML = '';
                 this._node.appendChild(this._tpl);
             }
-            return this;
         },
 
         $extend: function () {
