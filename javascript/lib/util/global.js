@@ -65,17 +65,17 @@ define(function ($p, $f, $w) {
     };
 
     if (doc.addEventListener) {
-        $p.addEvent = function (node, type, fn) {
+        $p.$addEvent = function (node, type, fn) {
             node.addEventListener(type, fn, false);
         }
-        $p.removeEvent = function (node, type, fn) {
+        $p.$removeEvent = function (node, type, fn) {
             node.removeEventListener(type, fn, false)
         }
     } else {
-        $p.addEvent = function (node, type, fn) {
+        $p.$addEvent = function (node, type, fn) {
             node.attachEvent('on' + type, fn);
         }
-        $p.removeEvent = function (node, type, fn) {
+        $p.$removeEvent = function (node, type, fn) {
             node.detachEvent('on' + type, fn);
         }
     }

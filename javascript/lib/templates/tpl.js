@@ -50,16 +50,18 @@ define([
                     var _fragment = document.createDocumentFragment(); \
                     _fragment.appendChild(_out); \
                     var _cnt = _fragment.childNodes[0]; \
-                    if(!!_cnt){\
-                        var _list = _cnt.getElementsByTagName("*");\
-                        for (var i = 0, n = _list.length; i < n; i++) {\
-                            var _o = _list[i];\
-                            var _tmp = _o.getAttribute("tpl_event");\
-                            if(_tmp){\
-                                var _rxp = /@p([0-9]*)/igm; \
-                                _event[_tmp].F.replace(_rxp, function($, _a){\
-                                    console.log(_event[_tmp].P);\
-                                })\
+                    if(!!_cnt){ \
+                        var _list = _cnt.getElementsByTagName("*"); \
+                        for (var i = 0, n = _list.length; i < n; i++) { \
+                            var _n = _list[i]; \
+                            var _tmp = _n.getAttribute("tpl_event"); \
+                            if(_tmp){ \
+                                var _o = _event[_tmp]; \
+                                var _eventFn =  function($event){  \
+                                    var _f = new Function("$event, tpl_P", _o.F); \
+                                    _f.call(this, $event, _o.P); \
+                                }.bind(this);\
+                                _helper.$addEvent(_n, _o.E, _eventFn); \
                             }\
                         }\
                     }\
@@ -112,15 +114,14 @@ define([
                     var _pArr = [];
                     var _pCount = 0;
                     _arr.forEach(function (param) {
-                        if (param.indexOf("'") < 0 && isNaN(param)) {
+                        if (param.indexOf("'") < 0 && isNaN(param) && param != '$event') {
                             _variables.push(param.split('.')[0]);
                             _pArr.push(param);
-                            _fn = _fn.replace(param, '@P' + _pCount++);
+                            _fn = _fn.replace(param, 'tpl_P[' + _pCount++ + ']');
                         }
                     })
                 }
-                return '";_out+="tpl_event="+(_eventCount++); _event.push({E: "' + _event + '", F: "' + _fn + '", P: ' + _pArr + '}); _out += "';
-                //return 'tplEvent = ";_out+="' + _event + '"  ;_out+=" tplFn = ' + _fn;
+                return '";_out+="tpl_event="+(_eventCount++); _event.push({E: "' + _event + '", F: "' + _fn + '", P: [' + _pArr + ']}); _out += "';
             })
 
             // interpolate expression
@@ -137,7 +138,7 @@ define([
 
         if (_html.indexOf('"') > 0) prefix += '"; _out += "'
         var _result = _convert.replace(/<%innerFunction%>/g, prefix + _html);
-        console.log(_result)
+        //console.log(_result)
         return new Function('_data, _helper', _result);
     }
 
