@@ -57,11 +57,13 @@ define([
                             var _tmp = _n.getAttribute("tpl_event"); \
                             if(_tmp){ \
                                 var _o = _event[_tmp]; \
-                                var _eventFn =  function($event){  \
-                                    var _f = new Function("$event, tpl_P", _o.F); \
-                                    _f.call(this, $event, _o.P); \
-                                }.bind(this);\
-                                _helper.$addEvent(_n, _o.E, _eventFn); \
+                                _helper.$addEvent(_n, _o.E, (function (_o) { \
+                                    return function ($event){ \
+                                        var _f = new Function("$event, tpl_P", _o.F); \
+                                        _f.call(this, $event, _o.P); \
+                                    }.bind(this) \
+                                }.bind(this))(_o)); \
+                                _n.removeAttribute("tpl_event"); \
                             }\
                         }\
                     }\
@@ -138,7 +140,6 @@ define([
 
         if (_html.indexOf('"') > 0) prefix += '"; _out += "'
         var _result = _convert.replace(/<%innerFunction%>/g, prefix + _html);
-        //console.log(_result)
         return new Function('_data, _helper', _result);
     }
 
