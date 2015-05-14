@@ -54,6 +54,39 @@ define(function ($p, $f, $w) {
         return cloned;
     }
 
+    // same ps: in this function Array as Object so use type
+    $p.$same = function (target1, target2, deep) {
+
+        var _deep = !!deep, check = arguments.callee;
+        if (target1 === target2) return true;
+        if (target1.constructor !== target2.constructor) return false;
+
+        // If they are not strictly equal, they both need to be Objects
+        if (!( target1 instanceof Object ) || !( target2 instanceof Object )) return false;
+
+        for (var p in target1) {
+
+            if (target1.hasOwnProperty(p)) {
+                if (!target2.hasOwnProperty(p)) return false;
+                if (target1[p] === target2[p]) continue;
+
+                // Numbers, Strings, Functions, Booleans must be strictly equal
+                if (typeof( target1[p] ) !== "object") return false;
+
+                // Objects and Arrays must be tested recursively
+                if (_deep && !check(target1[p], target2[p])) {
+                    return false;
+                }
+            }
+        }
+
+        for (p in target2) {
+            // allows target1[ p ] to be set to undefined
+            if (target2.hasOwnProperty(p) && !target1.hasOwnProperty(p)) return false;
+        }
+        return true;
+    };
+
     // 编码函数
     var _encode = function (_map, _content) {
         _content = '' + _content;

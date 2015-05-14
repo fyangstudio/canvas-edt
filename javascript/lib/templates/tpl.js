@@ -122,11 +122,13 @@ define([
         constructor: $tpl,
 
         _init: function (param) {
+
             if (_g.$isFunction(param.$init)) param.$init();
+            param.$update = this.$update;
+
             this.param = param;
             this.template = param.template || '';
             this.data = _g.$clone(param.data) || {};
-
             this._dataCache = _g.$clone(this.data);
             if (!this.template) throw new Error('template is null or not defined!');
 

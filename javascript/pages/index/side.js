@@ -28,14 +28,16 @@ define([
         },
         test: function (_id) {
             console.log(_id);
+            tpl.data.info.name = 'PP';
+            tpl.$update();
         }
     }).$inject('#test');
 
-    console.log(_g.$clone(document.getElementById('test'), true));
 
-    setTimeout(function () {
-        tpl.data.info.name = 'PP';
-        tpl.$update();
-    }, 1000);
+    var t1 = {a: [1, 2, 3], b: {1: 1, 2: 2}, c: 1};
+    var t2 = {a: [1, 2, 3], b: {1: 1, 2: 2}, c: 1};
+    console.log(_g.$same(t1, t2, true));
+
+    console.log(_g.$clone(document.getElementById('test'), true));
 
 });
