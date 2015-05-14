@@ -174,13 +174,14 @@ define([
         $update: function () {
 
             // auto
-            //this._dataCache = _g.$clone(this.data, true);
+            this._dataCache = _g.$clone(this.data, true);
 
             this._tpl = this._creatDom();
             if (!!this._node) {
                 this._node.innerHTML = '';
                 this._node.appendChild(this._tpl);
             }
+            console.log('refresh');
         },
 
         $extend: function () {
