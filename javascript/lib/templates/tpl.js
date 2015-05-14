@@ -46,7 +46,7 @@ define([
                 var _eventCount = 0; \
                 try { \
                     <%innerFunction%>"; \
-                    var _result = _eventFn.bind(this); \
+                    var _result = _render.bind(this); \
                     return _result(_out, "tpl_event", _event, _helper); \
                 } catch(e) {throw new Error("$tpl: "+e.message);}';
 
@@ -118,9 +118,9 @@ define([
             prefix += 'var ' + _variable + ' = _data.' + _variable + (i == l - 1 ? '||"' : '||"";');
         }
 
-        if (_html.indexOf('"') > 0) prefix += '"; _out += "'
+        if (_html.indexOf('"') > 0) prefix += '"; _out += "';
         var _result = _convert.replace(/<%innerFunction%>/g, prefix + _html);
-        return new Function('_data, _helper, _eventFn', _result);
+        return new Function('_data, _helper, _render', _result);
     }
 
     var $tpl = function (param) {
@@ -149,7 +149,7 @@ define([
         _creatDom: function () {
 
             // parse event function
-            var _eFn = function (_html, _target, _event, _u) {
+            var _render = function (_html, _target, _event, _u) {
                 var _node = _u.$parseHTML(_html);
                 var _fragment = document.createDocumentFragment();
                 _fragment.appendChild(_node);
@@ -174,7 +174,7 @@ define([
                 return _fragment;
             }
 
-            var _tpl = this._tplFactory.call(this.param, this.data, _g, _eFn);
+            var _tpl = this._tplFactory.call(this.param, this.data, _g, _render);
             return _tpl;
         },
 
