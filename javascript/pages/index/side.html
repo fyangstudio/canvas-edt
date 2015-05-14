@@ -1,7 +1,7 @@
 {{!有用户信息!}}
 <div class="side" id="test2">
 {{#if !!info}}
-    <p>你好，{{info.name}}！</p>
+    <p on-click={{alert(info.name)}}>你好，{{info.name}}！</p>
     {{#if !!info.vip }}
         {{#if info.level < 5}}
             <p>普通会员</p>

@@ -42,32 +42,12 @@ define([
                 "use strict"; \
                 var _tpl = {}; \
                 var _out = ""; \
-                var _event = [];\
+                var _event = []; \
+                var _eventCount = 0; \
                 try { \
-                    var _eventCount = 0;\
                     <%innerFunction%>"; \
-                    _out = _helper.$parseHTML(_out); \
-                    var _fragment = document.createDocumentFragment(); \
-                    _fragment.appendChild(_out); \
-                    var _cnt = _fragment.childNodes[0]; \
-                    if(!!_cnt){ \
-                        var _list = _cnt.getElementsByTagName("*"); \
-                        for (var i = 0, n = _list.length; i < n; i++) { \
-                            var _n = _list[i]; \
-                            var _tmp = _n.getAttribute("tpl_event"); \
-                            if(_tmp){ \
-                                var _o = _event[_tmp]; \
-                                _helper.$addEvent(_n, _o.E, (function (_o) { \
-                                    return function ($event){ \
-                                        var _f = new Function("$event, tpl_P", _o.F); \
-                                        _f.call(this, $event, _o.P); \
-                                    }.bind(this) \
-                                }.bind(this))(_o)); \
-                                _n.removeAttribute("tpl_event"); \
-                            }\
-                        }\
-                    }\
-                    return _fragment; \
+                    var _result = _eventFn.bind(this); \
+                    return _result(_out, "tpl_event", _event, _helper); \
                 } catch(e) {throw new Error("$tpl: "+e.message);}';
 
         var _html = _tmp
@@ -140,7 +120,7 @@ define([
 
         if (_html.indexOf('"') > 0) prefix += '"; _out += "'
         var _result = _convert.replace(/<%innerFunction%>/g, prefix + _html);
-        return new Function('_data, _helper', _result);
+        return new Function('_data, _helper, _eventFn', _result);
     }
 
     var $tpl = function (param) {
@@ -168,8 +148,33 @@ define([
 
         _creatDom: function () {
 
-            // parse function todo
-            var _tpl = this._tplFactory.call(this.param, this.data, _g);
+            // parse event function
+            var _eFn = function (_html, _target, _event, _u) {
+                var _node = _u.$parseHTML(_html);
+                var _fragment = document.createDocumentFragment();
+                _fragment.appendChild(_node);
+                var _cnt = _fragment.childNodes[0];
+                if (!!_cnt) {
+                    var _list = _cnt.getElementsByTagName("*");
+                    for (var i = 0, n = _list.length; i <= n; i++) {
+                        var _n = (i == n ? _cnt : _list[i]);
+                        var _tmp = _n.getAttribute(_target);
+                        if (_tmp) {
+                            var _o = _event[_tmp];
+                            _u.$addEvent(_n, _o.E, (function (_o) {
+                                return function ($event) {
+                                    var _f = new Function("$event, tpl_P", _o.F);
+                                    _f.call(this, $event, _o.P);
+                                }.bind(this)
+                            }.bind(this))(_o));
+                            _n.removeAttribute(_target);
+                        }
+                    }
+                }
+                return _fragment;
+            }
+
+            var _tpl = this._tplFactory.call(this.param, this.data, _g, _eFn);
             return _tpl;
         },
 
