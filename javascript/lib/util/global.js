@@ -34,6 +34,26 @@ define(function ($p, $f, $w) {
         return _list.length > 1 ? _cnt : _list[0];
     }
 
+    // clone
+    $p.$clone = function (target, deep) {
+
+        var cloned, _deep = !!deep, cloneObject = arguments.callee;
+        if (!!target.nodeType) target.cloneNode(_deep);
+        if (target === null || target === undefined || !this.$isObject(target)) return target;
+
+        if (this.$isArray(target)) {
+            if (!_deep) return target;
+
+            cloned = [];
+            for (var i in target) cloned.push(cloneObject(target[i], _deep));
+            return cloned;
+        }
+
+        cloned = {};
+        for (var i in target)cloned[i] = _deep ? cloneObject(target[i], true) : target[i];
+        return cloned;
+    }
+
     // 编码函数
     var _encode = function (_map, _content) {
         _content = '' + _content;

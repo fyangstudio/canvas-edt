@@ -1,7 +1,8 @@
 define([
+    'lib!util/global',
     '$text!./side.html',
     'lib!templates/tpl',
-], function (tpl, $tpl, $p, $f, $w) {
+], function (_g, tpl, $tpl, $p, $f, $w) {
     var _data = {
         info: {
             name: 'Yangfan',

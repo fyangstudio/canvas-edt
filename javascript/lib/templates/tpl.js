@@ -16,16 +16,6 @@ define([
         elseifStart: /{{#elseif\s*([^}]*?)}}/igm
     }
 
-    var _clone = function (obj) {
-
-        if (null == obj || !_g.$isObject(obj)) return obj;
-
-        var copy = obj.constructor();
-        for (var attr in obj) copy[attr] = obj[attr];
-
-        return copy;
-    }
-
     var _makeTemplate = function (_tpl) {
 
         var _variables = [], _tplArr = _tpl.split('\n');
@@ -135,9 +125,9 @@ define([
             if (_g.$isFunction(param.$init)) param.$init();
             this.param = param;
             this.template = param.template || '';
-            this.data = _clone(param.data) || {};
+            this.data = _g.$clone(param.data) || {};
 
-            this._dataCache = _clone(this.data);
+            this._dataCache = _g.$clone(this.data);
             if (!this.template) throw new Error('template is null or not defined!');
 
             this._tplFactory = _makeTemplate(this.template);
@@ -148,7 +138,7 @@ define([
 
         _creatDom: function () {
 
-            // parse event function
+            // parse tpl and add event function
             var _render = function (_html, _target, _event, _u) {
                 var _node = _u.$parseHTML(_html);
                 var _fragment = document.createDocumentFragment();
