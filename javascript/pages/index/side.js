@@ -32,6 +32,14 @@ define([
         }
     }).$inject('#test');
 
+    _g.$ajax({
+        method: 'GET',
+        url: 'http://fed.hz.netease.com/api/getblogs',
+        dataType: 'JSON',
+        success: function (_json) {
+            // console.log(_json)
+        }
+    })
 
     _g.$watchHash(function (_hash) {
         alert(_hash)

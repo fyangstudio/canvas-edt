@@ -50,6 +50,18 @@ define(function ($p, $f, $w) {
         var _list = _cnt.childNodes;
         return _list.length > 1 ? _cnt : _list[0];
     };
+    $p.$parseJSON = function (_json) {
+
+        if (_json === null) return _json;
+
+        if (window.JSON && window.JSON.parse) return window.JSON.parse(_json);
+
+        if ($p.$isString(_json)) {
+            _json = _json._$trim();
+            if (_json) return ( new Function('return ' + _json) )();
+        }
+        throw new Error('Invalid JSON: ' + _json);
+    }
 
     // clone
     $p.$clone = function (target, deep) {
@@ -108,7 +120,8 @@ define(function ($p, $f, $w) {
     var _hash = window.location.hash;
     var _hashFns = [];
 
-    // hash
+    /* hash
+     ---------------------------------------------------------------------- */
     $p.$hash = function (value) {
         if (value != undefined) window.location.hash = value;
         return window.location.hash.replace('#', '');
@@ -136,7 +149,65 @@ define(function ($p, $f, $w) {
         }
     }
 
-    // 编码函数
+    /* request
+     ---------------------------------------------------------------------- */
+    var _ajaxHandler = function () {
+    }
+    _ajaxHandler.prototype = {
+
+        // ajax 请求
+        _request: function (config) {
+            if (!!config.url) {
+                var
+                    _method = config.method || 'GET',       // ajax请求方法
+                    _url = config.url,                      // ajax请求地址
+                    _data = config.data || null,            // ajax post数据
+                    _dataType = config.dataType || 'JSON',  // 回调类型
+                    _success = config.success || $f,        // 请求成功回调函数
+                    _error = config.error || $f,            // 请求失败回调函数
+                    _xhr = this._createXhrObject();
+                _xhr.onreadystatechange = function () {
+                    if (_xhr.readyState !== 4) return;
+                    var _responseData = _dataType == 'JSON' ? $p.$parseJSON(_xhr.responseText) : _xhr.responseText;
+                    (_xhr.status === 200) ? _success(_responseData) : _error(_xhr.status);
+                };
+                _xhr.open(_method, _url, true);
+                if (_method !== 'POST') _data = null;
+                _xhr.send(_data);
+            }
+        },
+        _createXhrObject: function () {
+            var _methods = [
+                function () {
+                    return new XMLHttpRequest();
+                },
+                function () {
+                    return new ActiveXObject('Msxml2.XMLHTTP');
+                },
+                function () {
+                    return new ActiveXObject('Microsoft.XMLHTTP');
+                }
+            ];
+            for (var i = 0, l = _methods.length; i < l; i++) {
+                try {
+                    _methods[i]();
+                } catch (e) {
+                    continue;
+                }
+                this._createXhrObject = _methods[i];
+                return _methods[i]();
+            }
+            throw new Error('Could not create an XHR object');
+        }
+    }
+
+    $p.$ajax = function (config) {
+        if ($p.$isObject(config)) return new _ajaxHandler()._request(config);
+        else throw new Error('Ajax parameter error');
+    }
+
+    /* encode decode
+     ---------------------------------------------------------------------- */
     var _encode = function (_map, _content) {
         _content = '' + _content;
         if (!_map || !_content) {
@@ -196,24 +267,18 @@ define(function ($p, $f, $w) {
     }
 
     IDSelector.prototype = {
-
         find: function (context) {
             var ret = [];
             ret.push(context.getElementById(this.id));
             return ret;
         },
-
         match: function (element) {
             return element.id == this.id;
         }
-
     };
     IDSelector.test = function (selector) {
-
         var regex = /^#([\w\-_]+)/;
-
         return regex.test(selector);
-
     };
 
     //元素选择器
@@ -222,12 +287,9 @@ define(function ($p, $f, $w) {
     }
 
     TagSelector.prototype = {
-
         find: function (context) {
             return context.getElementsByTagName(this.tagName);
-
         },
-
         match: function (element) {
             return this.tagName == element.tagName.toUpperCase() || this.tagName === '*';
         }
@@ -257,15 +319,12 @@ define(function ($p, $f, $w) {
             //支持原生getElementsByClassName
             if (context.getElementsByClassName) {
                 elements = context.getElementsByClassName(className);
-                if (!tagName) {
-                    return elements;
-                }
+                if (!tagName) return elements;
                 for (var i = 0, n = elements.length; i < n; i++) {
                     if (selector.match(elements[i])) {
                         ret.push(elements[i]);
                     }
                 }
-
             } else {
                 elements = selector.find(context);
                 for (var i = 0, n = elements.length; i < n; i++) {
@@ -274,9 +333,7 @@ define(function ($p, $f, $w) {
                     }
                 }
             }
-
             return ret;
-
         },
 
         match: function (element) {
@@ -288,7 +345,6 @@ define(function ($p, $f, $w) {
     };
     ClassSelector.test = function (selector) {
         var regex = /^([\w\-_]*)\.([\w\-_]+)/;
-
         return regex.test(selector);
     };
 
@@ -309,22 +365,15 @@ define(function ($p, $f, $w) {
                 parent = parent.parentNode;
             }
         }
-
         return (parts[0] && ret[0]) ? filter(parts, ret) : ret;
     }
 
     //根据查询选择符创建相应选择器对象
     var Factory = {
-
         create: function (query) {
-
-            if (IDSelector.test(query)) {
-                return new IDSelector(query);
-            } else if (ClassSelector.test(query)) {
-                return new ClassSelector(query);
-            } else {
-                return new TagSelector(query);
-            }
+            if (IDSelector.test(query)) return new IDSelector(query);
+            else if (ClassSelector.test(query)) return new ClassSelector(query);
+            else return new TagSelector(query);
         }
     };
 
