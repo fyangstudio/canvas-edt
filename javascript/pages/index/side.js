@@ -33,12 +33,13 @@ define([
     }).$inject('#test');
 
 
-    _g.$watchHash(function () {
-        alert(2)
+    _g.$watchHash(function (_hash) {
+        alert(_hash)
     })
     _g.$watchHash(function () {
         alert(3)
     })
+    _g.$hash('xxx');
 
     var t1 = {a: [1, 2, 3], b: {1: 1, 2: 2}, c: 1};
     var t2 = {a: [1, 2, 3], b: {1: 1, 2: 2}, c: 1};

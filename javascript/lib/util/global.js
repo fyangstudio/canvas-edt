@@ -106,6 +106,7 @@ define(function ($p, $f, $w) {
     };
 
     var _hash = window.location.hash;
+    var _hashFns = [];
 
     // hash
     $p.$hash = function (value) {
@@ -121,10 +122,13 @@ define(function ($p, $f, $w) {
                     callback(_hash);
                 })
             } else {
+                _hashFns.push(callback);
                 setInterval(function () {
                     if (window.location.hash != _hash) {
+                        _hashFns.forEach(function (_fn) {
+                            _fn.call(this, window.location.hash);
+                        })
                         _hash = $p.$hash();
-                        callback(_hash);
                     }
                 }, 150);
             }
