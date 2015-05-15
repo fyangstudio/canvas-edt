@@ -167,7 +167,7 @@ define([
                                         try {
                                             _f.call(this, "this.data." + _o.F);
                                         } catch (e) {
-                                            // ignore
+                                            return false;
                                         }
                                     }
                                     if (!_u.$same(_dataCache, this.data, true)) this.$update();
