@@ -57,7 +57,7 @@ define(function ($p, $f, $w) {
         if (window.JSON && window.JSON.parse) return window.JSON.parse(_json);
 
         if ($p.$isString(_json)) {
-            _json = _json._$trim();
+            _json = _json.trim();
             if (_json) return ( new Function('return ' + _json) )();
         }
         throw new Error('Invalid JSON: ' + _json);
@@ -74,12 +74,12 @@ define(function ($p, $f, $w) {
             if (!_deep) return target;
 
             cloned = [];
-            for (var i in target) cloned.push(cloneObject(target[i], _deep));
+            for (var i in target) if(target.hasOwnProperty(i)) cloned.push(cloneObject(target[i], _deep));
             return cloned;
         }
 
         cloned = {};
-        for (var i in target)cloned[i] = _deep ? cloneObject(target[i], true) : target[i];
+        for (var i in target) if(target.hasOwnProperty(i)) cloned[i] = _deep ? cloneObject(target[i], true) : target[i];
         return cloned;
     };
 
@@ -93,7 +93,6 @@ define(function ($p, $f, $w) {
 
         // If they are not strictly equal, they both need to be Objects
         if (!( target1 instanceof Object ) || !( target2 instanceof Object )) return false;
-
         for (var p in target1) {
 
             if (target1.hasOwnProperty(p)) {
