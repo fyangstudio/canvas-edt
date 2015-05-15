@@ -156,8 +156,20 @@ define([
                             var _o = _event[_tmp];
                             _u.$addEvent(_n, _o.E, (function (_o) {
                                 return function ($event) {
-                                    var _f = new Function("$event, tpl_P", _o.F);
-                                    _f.call(this, $event, _o.P);
+                                    var _f = function (_fs) {
+                                        var _tmp = new Function("$event, tpl_P", _fs);
+                                        _tmp.call(this, $event, _o.P);
+                                    };
+                                    // fuck IE
+                                    try {
+                                        _f.call(this, _o.F);
+                                    } catch (e) {
+                                        try {
+                                            _f.call(this, "this.data." + _o.F);
+                                        } catch (e) {
+                                            // ignore
+                                        }
+                                    }
                                     if (!_u.$same(_dataCache, this.data, true)) this.$update();
                                 }.bind(this)
                             }.bind(this))(_o));

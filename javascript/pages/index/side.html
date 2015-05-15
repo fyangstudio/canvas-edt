@@ -1,7 +1,7 @@
 {{!有用户信息!}}
 <div class="side" id="test2">
 {{#if !!info}}
-    <p on-click={{alert(info.name)}}>你好，{{info.name}}！</p>
+    <p on-click={{info.name='xxx'}}>你好，{{info.name}}！</p>
     {{#if !!info.vip }}
         {{#if info.level < 5}}
             <p>普通会员</p>
@@ -19,7 +19,7 @@
         {{#if book.read}}
             <p on-click={{this.test(book.id,'sss',1)}}>{{book.name}}：已读</p>
         {{#else}}
-            <p>{{book.name}}：未读</p>
+            <p on-click={{alert(info.name)}}>{{book.name}}：未读</p>
         {{/if}}
         {{#if !!book.note}}
             {{#list book.note as n}}
