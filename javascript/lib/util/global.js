@@ -1,4 +1,41 @@
 define(function ($p, $f, $w) {
+    var _doc = document;
+    var _noop = $f;
+
+    if (_doc.addEventListener) {
+        $p.$addEvent = function (node, type, fn) {
+            node.addEventListener(type, fn, false);
+        }
+        $p.$removeEvent = function (node, type, fn) {
+            node.removeEventListener(type, fn, false)
+        }
+    } else {
+        $p.$addEvent = function (node, type, fn) {
+            node.attachEvent('on' + type, fn);
+        }
+        $p.$removeEvent = function (node, type, fn) {
+            node.detachEvent('on' + type, fn);
+        }
+    }
+
+    // 类型判断
+    function _isType(type) {
+        return function (obj) {
+            return {}.toString.call(obj) == '[object ' + type + ']';
+        }
+    }
+
+    // @return {Boolean}          是否是object
+    $p.$isObject = _isType('Object');
+
+    // @return {Boolean}          是否是string
+    $p.$isString = _isType('String');
+
+    // @return {Boolean}          是否是array
+    $p.$isArray = Array.isArray || _isType('Array');
+
+    // @return {Boolean}          是否是function
+    $p.$isFunction = _isType('Function');
 
     /**
      *字符串前后空白去除
@@ -19,22 +56,18 @@ define(function ($p, $f, $w) {
      */
     if (!Function.prototype.bind) {
         Function.prototype.bind = function (oThis) {
-            if (typeof this !== 'function') {
+            if (!$p.$isFunction(this)) {
                 // closest thing possible to the ECMAScript 5 internal IsCallable function
                 throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable!');
             }
-
             var aArgs = Array.prototype.slice.call(arguments, 1),
                 fToBind = this,
-                fNOP = function () {
-                },
                 fBound = function () {
-                    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis || window,
+                    return fToBind.apply(this instanceof _noop && oThis ? this : oThis || window,
                         aArgs.concat(Array.prototype.slice.call(arguments)));
                 };
-
-            fNOP.prototype = this.prototype;
-            fBound.prototype = new fNOP();
+            _noop.prototype = this.prototype;
+            fBound.prototype = new _noop();
 
             return fBound;
         };
@@ -57,17 +90,14 @@ define(function ($p, $f, $w) {
         Array.prototype.forEach = function forEach(callback, thisArg) {
 
             var T, k = 0;
-
             if (this == null) throw new TypeError('this is null or not defined!');
             if (!$p.$isFunction(callback)) throw new TypeError(callback + ' is not a function!');
 
             var O = Object(this);
             var len = O.length >>> 0;
-
             if (thisArg) T = thisArg;
 
             while (k < len) {
-
                 var kValue;
                 if (Object.prototype.hasOwnProperty.call(O, k)) {
                     kValue = O[k];
@@ -104,7 +134,7 @@ define(function ($p, $f, $w) {
                 dontEnumsLength = dontEnums.length;
 
             return function (obj) {
-                if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object');
+                if (typeof obj !== 'object' && !$p.$isFunction(obj) || obj === null) throw new TypeError('Object.keys called on non-object');
 
                 var result = [];
 
@@ -128,68 +158,27 @@ define(function ($p, $f, $w) {
      */
     if (!$w.console) {
         $w.console = {
-            log: $f,
-            warn: $f,
-            error: $f
+            log: _noop,
+            warn: _noop,
+            error: _noop
         };
     }
 
-    var doc = document;
-
-    if (doc.addEventListener) {
-        $p.$addEvent = function (node, type, fn) {
-            node.addEventListener(type, fn, false);
-        }
-        $p.$removeEvent = function (node, type, fn) {
-            node.removeEventListener(type, fn, false)
-        }
-    } else {
-        $p.$addEvent = function (node, type, fn) {
-            node.attachEvent('on' + type, fn);
-        }
-        $p.$removeEvent = function (node, type, fn) {
-            node.detachEvent('on' + type, fn);
-        }
-    }
-
-    // 类型判断
-    function _isType(type) {
-        return function (obj) {
-            return {}.toString.call(obj) == '[object ' + type + ']';
-        }
-    }
-
-    // @return {Boolean}          是否是object
-    $p.$isObject = _isType('Object');
-
-    // @return {Boolean}          是否是string
-    $p.$isString = _isType('String');
-
-    // @return {Boolean}          是否是array
-    $p.$isArray = Array.isArray || _isType('Array');
-
-    // @return {Boolean}          是否是function
-    $p.$isFunction = _isType('Function');
-
     // @return {node}             字符串转HTML
     $p.$parseHTML = function (txt) {
-
         if (!txt) return;
         var _reg = /<(.*?)(?=\s|>)/i, // first tag name
             _parentNodeMap = {li: 'ul', tr: 'tbody', td: 'tr', th: 'tr', option: 'select'};
         var _tag;
         if (_reg.test(txt)) _tag = _parentNodeMap[(RegExp.$1 || '').toLowerCase()] || '';
-        var _cnt = document.createElement(_tag || 'div');
+        var _cnt = _doc.createElement(_tag || 'div');
         _cnt.innerHTML = txt;
         var _list = _cnt.childNodes;
         return _list.length > 1 ? _cnt : _list[0];
     };
     $p.$parseJSON = function (_json) {
-
         if (_json === null) return _json;
-
         if (window.JSON && window.JSON.parse) return window.JSON.parse(_json);
-
         if ($p.$isString(_json)) {
             _json = _json.trim();
             if (_json) return ( new Function('return ' + _json) )();
@@ -206,7 +195,6 @@ define(function ($p, $f, $w) {
 
         if ($p.$isArray(target)) {
             if (!_deep) return target;
-
             cloned = [];
             for (var i in target) if (target.hasOwnProperty(i)) cloned.push(cloneObject(target[i], _deep));
             return cloned;
@@ -262,7 +250,7 @@ define(function ($p, $f, $w) {
 
     $p.$watchHash = function (callback) {
         if ($p.$isFunction(callback)) {
-            if (('onhashchange' in window) && ((typeof document.documentMode === 'undefined') || document.documentMode == 8)) {
+            if (('onhashchange' in window) && ((typeof _doc.documentMode === 'undefined') || _doc.documentMode == 8)) {
                 $p.$addEvent(window, 'hashchange', function () {
                     _hash = $p.$hash();
                     callback(_hash);
@@ -296,8 +284,8 @@ define(function ($p, $f, $w) {
                     _url = config.url,                      // ajax请求地址
                     _data = config.data || null,            // ajax post数据
                     _dataType = config.dataType || 'JSON',  // 回调类型
-                    _success = config.success || $f,        // 请求成功回调函数
-                    _error = config.error || $f,            // 请求失败回调函数
+                    _success = config.success || _noop,     // 请求成功回调函数
+                    _error = config.error || _noop,         // 请求失败回调函数
                     _xhr = this._createXhrObject();
                 _xhr.onreadystatechange = function () {
                     if (_xhr.readyState !== 4) return;
@@ -372,7 +360,7 @@ define(function ($p, $f, $w) {
 
     function api(query, context) {
 
-        context = context || doc;
+        context = context || _doc;
 
         //调用原生选择器
         if (context.querySelectorAll) {
@@ -490,7 +478,7 @@ define(function ($p, $f, $w) {
 
         for (var i = 0, n = nodeList.length; i < n; i++) {
             parent = nodeList[i].parentNode;
-            while (parent && parent !== doc) {
+            while (parent && parent !== _doc) {
                 if (selector.match(parent)) {
                     ret.push(nodeList[i]);
                     break;
