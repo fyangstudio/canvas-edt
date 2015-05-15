@@ -111,7 +111,7 @@ define(function ($p, $f, $w) {
     // hash
     $p.$hash = function (value) {
         if (value != undefined) window.location.hash = value;
-        return window.location.hash;
+        return window.location.hash.replace('#', '');
     };
 
     $p.$watchHash = function (callback) {
@@ -124,9 +124,10 @@ define(function ($p, $f, $w) {
             } else {
                 _hashFns.push(callback);
                 setInterval(function () {
-                    if (window.location.hash != _hash) {
+                    var _h = window.location.hash.replace('#', '');
+                    if (_h != _hash) {
                         _hashFns.forEach(function (_fn) {
-                            _fn.call(this, window.location.hash);
+                            _fn.call(this, _h);
                         })
                         _hash = $p.$hash();
                     }
