@@ -142,6 +142,7 @@ define([
 
             // parse tpl and add event function
             var _render = function (_html, _target, _event, _u, _dataCache) {
+                var _times = 0;
                 var _node = _u.$parseHTML(_html);
                 var _fragment = document.createDocumentFragment();
                 _fragment.appendChild(_node);
@@ -161,6 +162,7 @@ define([
                                 }.bind(this)
                             }.bind(this))(_o));
                             _n.removeAttribute(_target);
+                            if (++_times == _event.length) break;
                         }
                     }
                 }
