@@ -128,7 +128,7 @@ define([
 
             this.param = param;
             this.template = param.template || '';
-            this.data = _g.$clone(param.data) || {};
+            this.data = param.data ? _g.$clone(param.data) : {};
             this._dataCache = _g.$clone(this.data, true);
             if (!this.template) throw new Error('template is null or not defined!');
 
@@ -198,12 +198,13 @@ define([
             console.log('refresh');
         },
 
-        $extend: function () {
-
+        $extend: function (newParam) {
+            var _parent = this;
+            return $tpl(newParam);
         },
 
         $inject: function (selector) {
-            var _node = _g.dom.get(selector)[0]
+            var _node = _g.dom.get(selector)[0];
             if (!_node) throw new Error('inject node is null or not defined!');
             this._node = _node;
             _node.innerHTML = '';

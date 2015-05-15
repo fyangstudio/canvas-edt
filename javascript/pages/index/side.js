@@ -52,4 +52,6 @@ define([
 
     console.log(_g.$clone(document.getElementById('test'), true));
 
+    return tpl;
+
 });

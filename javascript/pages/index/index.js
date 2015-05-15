@@ -15,6 +15,8 @@ define([
         // 调用_$$Module的初始化逻辑
         this.__super();
         console.log('child class');
+
+        // var _cnt = sd.$extend({1: 1});
     };
     //console.log($w)
     //console.log(ie);
