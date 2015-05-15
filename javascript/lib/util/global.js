@@ -1,5 +1,139 @@
 define(function ($p, $f, $w) {
 
+    /**
+     *字符串前后空白去除
+     * @return {String}         - 去除空白后的字符串
+     *
+     */
+    if (!String.prototype.trim) {
+        String.prototype.trim = function () {
+            return this.replace(/^\s+|\s+$/g, '');
+        };
+    }
+
+    /**
+     *当前函数this拓展
+     * @param  {Object}    arg0 - 函数内this
+     * @return {Function}       - 绑定后的函数
+     *
+     */
+    if (!Function.prototype.bind) {
+        Function.prototype.bind = function (oThis) {
+            if (typeof this !== 'function') {
+                // closest thing possible to the ECMAScript 5 internal IsCallable function
+                throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable!');
+            }
+
+            var aArgs = Array.prototype.slice.call(arguments, 1),
+                fToBind = this,
+                fNOP = function () {
+                },
+                fBound = function () {
+                    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis || window,
+                        aArgs.concat(Array.prototype.slice.call(arguments)));
+                };
+
+            fNOP.prototype = this.prototype;
+            fBound.prototype = new fNOP();
+
+            return fBound;
+        };
+    }
+
+    /**
+     *数组遍历
+     * @param  {Function}  arg0 - 回调函数
+     * @param  {Object}    arg1 - 回调函数内this 可空
+     *
+     * ```javascript
+     * [1,2,3,4,5].forEach(function (value, index, array) {
+     *     //something
+     * })
+     * ```
+     *
+     */
+    if (!Array.prototype.forEach) {
+
+        Array.prototype.forEach = function forEach(callback, thisArg) {
+
+            var T, k = 0;
+
+            if (this == null) throw new TypeError('this is null or not defined!');
+            if (!$p.$isFunction(callback)) throw new TypeError(callback + ' is not a function!');
+
+            var O = Object(this);
+            var len = O.length >>> 0;
+
+            if (thisArg) T = thisArg;
+
+            while (k < len) {
+
+                var kValue;
+                if (Object.prototype.hasOwnProperty.call(O, k)) {
+                    kValue = O[k];
+                    callback.call(T, kValue, k, O);
+                }
+                k++;
+            }
+        };
+    }
+
+    /**
+     *修复低版本(IE 6,7) Object.keys 不能遍历问题
+     * @param  {Object}    arg0 - 取键值的目标对象
+     *
+     * ```javascript
+     * console.log(Object.keys({a:1,b:2,c:3}));
+     * // [a,b,c]
+     * ```
+     *
+     */
+    if (!Object.keys) {
+        Object.keys = (function () {
+            var hasOwnProperty = Object.prototype.hasOwnProperty,
+                hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
+                dontEnums = [
+                    'toString',
+                    'toLocaleString',
+                    'valueOf',
+                    'hasOwnProperty',
+                    'isPrototypeOf',
+                    'propertyIsEnumerable',
+                    'constructor'
+                ],
+                dontEnumsLength = dontEnums.length;
+
+            return function (obj) {
+                if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object');
+
+                var result = [];
+
+                for (var prop in obj) {
+                    if (hasOwnProperty.call(obj, prop)) result.push(prop);
+                }
+
+                if (hasDontEnumBug) {
+                    for (var i = 0; i < dontEnumsLength; i++) {
+                        if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i]);
+                    }
+                }
+                return result;
+            }
+        })()
+    }
+
+    /**
+     *修复低版本(IE 6,7) console报错问题
+     *
+     */
+    if (!$w.console) {
+        $w.console = {
+            log: $f,
+            warn: $f,
+            error: $f
+        };
+    }
+
     var doc = document;
 
     if (doc.addEventListener) {
@@ -74,12 +208,12 @@ define(function ($p, $f, $w) {
             if (!_deep) return target;
 
             cloned = [];
-            for (var i in target) if(target.hasOwnProperty(i)) cloned.push(cloneObject(target[i], _deep));
+            for (var i in target) if (target.hasOwnProperty(i)) cloned.push(cloneObject(target[i], _deep));
             return cloned;
         }
 
         cloned = {};
-        for (var i in target) if(target.hasOwnProperty(i)) cloned[i] = _deep ? cloneObject(target[i], true) : target[i];
+        for (var i in target) if (target.hasOwnProperty(i)) cloned[i] = _deep ? cloneObject(target[i], true) : target[i];
         return cloned;
     };
 
@@ -378,127 +512,6 @@ define(function ($p, $f, $w) {
 
     $p.dom = {};
     $p.dom.get = api;
-
-    /**
-     *字符串前后空白去除
-     * @return {String}         - 去除空白后的字符串
-     *
-     */
-    if (!String.prototype.trim) {
-        String.prototype.trim = function () {
-            return this.replace(/^\s+|\s+$/g, '');
-        };
-    }
-
-    /**
-     *当前函数this拓展
-     * @param  {Object}    arg0 - 函数内this
-     * @return {Function}       - 绑定后的函数
-     *
-     */
-    if (!Function.prototype.bind) {
-        Function.prototype.bind = function (oThis) {
-            if (typeof this !== 'function') {
-                // closest thing possible to the ECMAScript 5 internal IsCallable function
-                throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable!');
-            }
-
-            var aArgs = Array.prototype.slice.call(arguments, 1),
-                fToBind = this,
-                fNOP = function () {
-                },
-                fBound = function () {
-                    return fToBind.apply(this instanceof fNOP && oThis ? this : oThis || window,
-                        aArgs.concat(Array.prototype.slice.call(arguments)));
-                };
-
-            fNOP.prototype = this.prototype;
-            fBound.prototype = new fNOP();
-
-            return fBound;
-        };
-    }
-
-    /**
-     *数组遍历
-     * @param  {Function}  arg0 - 回调函数
-     * @param  {Object}    arg1 - 回调函数内this 可空
-     *
-     * ```javascript
-     * [1,2,3,4,5].forEach(function (value, index, array) {
-     *     //something
-     * })
-     * ```
-     *
-     */
-    if (!Array.prototype.forEach) {
-
-        Array.prototype.forEach = function forEach(callback, thisArg) {
-
-            var T, k = 0;
-
-            if (this == null) throw new TypeError('this is null or not defined!');
-            if (!$p.$isFunction(callback)) throw new TypeError(callback + ' is not a function!');
-
-            var O = Object(this);
-            var len = O.length >>> 0;
-
-            if (thisArg) T = thisArg;
-
-            while (k < len) {
-
-                var kValue;
-                if (Object.prototype.hasOwnProperty.call(O, k)) {
-                    kValue = O[k];
-                    callback.call(T, kValue, k, O);
-                }
-                k++;
-            }
-        };
-    }
-
-    /**
-     *修复低版本(IE 6,7) Object.keys 不能遍历问题
-     * @param  {Object}    arg0 - 取键值的目标对象
-     *
-     * ```javascript
-     * console.log(Object.keys({a:1,b:2,c:3}));
-     * // [a,b,c]
-     * ```
-     *
-     */
-    var DONT_ENUM = 'propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor'.split(','),
-        hasOwn = ({}).hasOwnProperty;
-    for (var i in {
-        toString: 1
-    }) {
-        DONT_ENUM = false;
-    }
-    Object.keys = Object.keys || function (obj) {
-        var result = [];
-        for (var key in obj) if (hasOwn.call(obj, key)) {
-            result.push(key)
-        }
-        if (DONT_ENUM && obj) {
-            for (var i = 0; key = DONT_ENUM[i++];) {
-                if (hasOwn.call(obj, key)) {
-                    result.push(key);
-                }
-            }
-        }
-        return result;
-    };
-    /**
-     *修复低版本(IE 6,7) console报错问题
-     *
-     */
-    if (!$w.console) {
-        $w.console = {
-            log: $f,
-            warn: $f,
-            error: $f
-        };
-    }
 
     return $p;
 })
