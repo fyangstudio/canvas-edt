@@ -186,6 +186,21 @@ define(function ($p, $f, $w) {
         throw new Error('Invalid JSON: ' + _json);
     }
 
+    // for in
+    $p.$forIn = function (obj, callback, thisArg) {
+        if (!obj || !callback) return null;
+        var _keys = Object.keys(obj);
+        for (var i = 0, l = _keys.length, _key, _ret; i < l; i++) {
+            _key = _keys[i];
+            _ret = callback.call(
+                thisArg || null,
+                obj[_key], _key, obj
+            );
+            if (!!_ret) return _key;
+        }
+        return null;
+    };
+
     // clone
     $p.$clone = function (target, deep) {
 

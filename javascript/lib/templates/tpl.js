@@ -199,7 +199,23 @@ define([
         },
 
         $extend: function (newParam) {
+            var _stack = [];
             var _parent = this;
+            _g.$forIn(_parent.param, function (attr, key) {
+                if (!newParam[key]) newParam[key] = attr;
+                else if (_g.$isFunction(newParam[key])) _stack.push(key);
+            });
+            newParam.$super = function () {
+                if (!_parent.param) return false;
+
+                var _name = '';
+                var _method = arguments.callee.caller;
+                _g.$forIn(_stack, function (_fn) {
+                    var _n = _parent.param[_fn];
+                    if (_g.$same(_n, _method)) _name = _fn;
+                });
+                if (_name) _parent.param[_name].apply(newParam, arguments);
+            }
             return $tpl(newParam);
         },
 

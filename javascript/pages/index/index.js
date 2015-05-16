@@ -16,7 +16,12 @@ define([
         this.__super();
         console.log('child class');
 
-        // var _cnt = sd.$extend({1: 1});
+        var _cnt = sd.$extend({
+            test: function (_id, _s, _tmp) {
+                this.$super(_id, _s, _tmp);
+            }
+        }).$inject('#test');
+        // console.log(_cnt);
     };
     //console.log($w)
     //console.log(ie);

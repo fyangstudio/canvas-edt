@@ -30,16 +30,17 @@ define([
             if (_tmp) this.data.info.name = 'PP' + _id + _s;
             _g.$hash(_id);
         }
-    }).$inject('#test');
+    });
+    // console.log(tpl);
 
-    _g.$ajax({
-        method: 'GET',
-        url: 'http://fed.hz.netease.com/api/getblogs',
-        dataType: 'JSON',
-        success: function (_json) {
-            // console.log(_json)
-        }
-    })
+    //_g.$ajax({
+    //    method: 'GET',
+    //    url: 'http://fed.hz.netease.com/api/getblogs',
+    //    dataType: 'JSON',
+    //    success: function (_json) {
+    //        // console.log(_json)
+    //    }
+    //})
 
     _g.$watchHash(function (_hash) {
         alert(_hash)
