@@ -201,6 +201,21 @@ define(function ($p, $f, $w) {
         return null;
     };
 
+    // string to object
+    $p.$s2o = function (string, _split) {
+        var _obj = {};
+        var _arr = (string || '').split(_split);
+        _arr.forEach(function (_name) {
+            var _brr = _name.split('=');
+            if (!_brr || !_brr.length) return;
+            var _key = _brr.shift();
+            if (!_key) return;
+            _obj[decodeURIComponent(_key)] = decodeURIComponent(_brr.join('='));
+        });
+        return _obj;
+    };
+    console.log($p.$s2o('x=1&y=2', '&'));
+
     // clone
     $p.$clone = function (target, deep) {
 
