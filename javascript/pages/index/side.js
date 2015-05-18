@@ -4,6 +4,8 @@ define([
     'lib!templates/tpl',
 ], function (_g, tpl, $tpl, $p, $f, $w) {
     var _data = {
+        type: 1,
+        from: 'ppstudio',
         info: {
             name: 'Yangfan',
             vip: true,
@@ -23,7 +25,9 @@ define([
 
     var tpl = $tpl({
         template: tpl,
-        $init: function () {
+        $focus: ["type", "from"],
+        $init: function (_hash) {
+            console.log(_hash.type)
             this.data = _data;
         },
         test: function (_id, _s, _tmp) {
@@ -45,7 +49,7 @@ define([
     _g.$watchHash(function (_hash) {
         alert(_hash)
     })
-    _g.$hash('xxx');
+    // _g.$hash('xxx');
 
     var t1 = {a: [1, 2, 3], b: {1: 1, 2: 2}, c: 1};
     var t2 = {a: [1, 2, 3], b: {1: 1, 2: 2}, c: 1};

@@ -123,7 +123,8 @@ define([
 
         _init: function (param) {
 
-            if (_g.$isFunction(param.$init)) param.$init();
+            if (param.$focus) var _hash = _g.$hash().replace('?', '');
+            if (_g.$isFunction(param.$init)) param.$init(_g.$s2o(_hash, '&') || {});
             param.$update = this.$update.bind(this);
 
             this.param = param;
@@ -170,6 +171,7 @@ define([
                                             return false;
                                         }
                                     }
+                                    // auto
                                     if (!_u.$same(_dataCache, this.data, true)) this.$update();
                                 }.bind(this)
                             }.bind(this))(_o));
@@ -189,6 +191,10 @@ define([
 
             // auto
             this._dataCache = _g.$clone(this.data, true);
+            
+            this.param.$focus.forEach(function (_h) {
+                console.log(_h)
+            })
 
             this._tpl = this._creatDom();
             if (!!this._node) {
