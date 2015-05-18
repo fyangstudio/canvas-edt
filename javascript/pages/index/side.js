@@ -27,7 +27,7 @@ define([
         template: tpl,
         $focus: ["type", "from"],
         $init: function (_hash) {
-            console.log(_hash.type)
+            console.log(_hash)
             this.data = _data;
         },
         test: function (_id, _s, _tmp) {

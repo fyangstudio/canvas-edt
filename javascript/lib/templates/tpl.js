@@ -191,10 +191,17 @@ define([
 
             // auto
             this._dataCache = _g.$clone(this.data, true);
-            
-            this.param.$focus.forEach(function (_h) {
-                console.log(_h)
-            })
+
+            var _hash = _g.$hash();
+            var _hashReg = /(\w+)\s*(=|%3D)\s*(\w+)/igm;
+
+            if (_hashReg.test(_hash)) {
+                var _newHash = '';
+                _hash.replace(_hashReg, function ($, name, char) {
+                    if (this.data[name])  _newHash += ( name + char + this.data[name] );
+                }.bind(this));
+                console.log(_newHash)
+            }
 
             this._tpl = this._creatDom();
             if (!!this._node) {
@@ -208,7 +215,7 @@ define([
             var _stack = [];
             var _parent = this;
             _g.$forIn(_parent.param, function (attr, key) {
-                if (!newParam[key]) newParam[key] = attr;
+                if (!newParam[key]) newParam[key] = _g.$clone(attr, true);
                 else if (_g.$isFunction(newParam[key])) _stack.push(key);
             });
             newParam.$super = function () {
