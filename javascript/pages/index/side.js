@@ -26,6 +26,15 @@ define([
     var tpl = $tpl({
         template: tpl,
         $focus: ["type", "from"],
+        $config: {
+            async: true,
+            method: 'get',
+            param: function () {
+                this.data.type = 1;
+                this.data.from = 'ppstudio';
+                return {"type": this.data.type, "from": this.data.from}
+            }
+        },
         $init: function () {
             this.data = _data;
         },
