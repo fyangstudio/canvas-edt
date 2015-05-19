@@ -162,15 +162,23 @@ define(function ($p, $f, $w) {
             }
             throw new Error('Invalid JSON: ' + json);
         }
-        _json.stringify = function (json) {
-            var _tmp = "";
-            for (var key in json) {
-                if (json.hasOwnProperty(key)) _tmp += "," + key + ":" + json[key];
-            }
-            if (_tmp != "") _tmp = _tmp.substring(1);
+        _json.stringify = function (obj) {
 
-            return "{" + _tmp + "}";
-        }
+            if (typeof (obj) != "object" || obj === null) {
+                if ($p.$isString(obj)) obj = '"' + obj + '"';
+                return String(obj);
+            }
+            else {
+                var json = [], arr = $p.$isArray(obj), stringify = arguments.callee;
+                for (var key in obj) {
+                    var v = obj[key];
+                    if ($p.$isString(v)) v = '"' + v + '"';
+                    else if (typeof (v) == "object" && v !== null) v = stringify(v);
+                    json.push((arr ? "" : '"' + key + '":') + String(v));
+                }
+                return (arr ? "[" : "{") + String(json) + (arr ? "]" : "}");
+            }
+        };
         window.JSON = _json;
     }
 
@@ -229,27 +237,20 @@ define(function ($p, $f, $w) {
     };
 
     // object to string
+    // $p.$o2s(obj, '&', !0)
     $p.$o2s = function (_object, _split, _encode) {
-        if (!_object) return '';
+        if (typeof (_object) != "object" || _object === null) return JSON.stringify(_object);
+
         var _arr = [];
         $p.$forIn(_object, function (_value, _key) {
             if ($p.$isFunction(_value)) return;
-            else if ($p.$isArray(_value)) _value = _value.join(',');
-            else if ($p.$isObject(_value)) _value = JSON.stringify(_value);
+            _value = JSON.stringify(_value);
 
             if (!!_encode) _value = encodeURIComponent(_value);
             _arr.push(encodeURIComponent(_key) + '=' + _value);
         });
         return _arr.join(_split || ',');
     };
-    var obj = {
-        a: [1, 2, 3],
-        b: {a: 'a', b: 'b'},
-        c: 'e',
-        d: 1,
-        e: true
-    };
-    console.log($p.$o2s(obj, '&'));
 
     // clone
     $p.$clone = function (target, deep) {
