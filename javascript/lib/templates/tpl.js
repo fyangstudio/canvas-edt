@@ -121,11 +121,14 @@ define([
 
         constructor: $tpl,
 
+        $container: document,
+
         _init: function (param) {
 
             if (param.$focus) var _hash = _g.$hash().replace('?', '');
-            if (_g.$isFunction(param.$init)) param.$init(_g.$s2o(_hash, '&') || {});
             param.$update = this.$update.bind(this);
+            param.$container = this.$container;
+            if (_g.$isFunction(param.$init)) param.$init(_g.$s2o(_hash, '&') || {});
 
             this.param = param;
             this.template = param.template || '';
@@ -235,7 +238,7 @@ define([
         $inject: function (selector) {
             var _node = _g.dom.get(selector)[0];
             if (!_node) throw new Error('inject node is null or not defined!');
-            this._node = _node;
+            this.param.$container = this._node = _node;
             _node.innerHTML = '';
             _node.appendChild(this._tpl);
             return this;
