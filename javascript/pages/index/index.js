@@ -22,7 +22,9 @@ define([
                 console.log(this.$container);
             }
         }).$inject('#test');
-        // console.log(_cnt);
+        _cnt.$on('update', function () {
+
+        })
     };
     //console.log($w)
     //console.log(ie);

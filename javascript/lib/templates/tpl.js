@@ -154,7 +154,7 @@ define([
                     var _value = _data[key];
                     if (_value) _hash[key] = _value;
                 }.bind(this))
-                _g.$hash('?' + _g.$o2s(_hash, '&'));
+                _g.$hash('!' + _g.$o2s(_hash, '&'));
             }
         },
 
@@ -263,6 +263,19 @@ define([
     }
 
     $tpl.fn._init.prototype = $tpl.fn;
+
+    $tpl.fn.$on = function (event, fn) {
+        if (typeof event === "object") {
+            for (var i in event) {
+                this.$on(i, event[i]);
+            }
+        } else {
+            var _handles = this._handles || (this._handles = {}),
+                _calls = _handles[event] || (_handles[event] = []);
+            _calls.push(fn);
+        }
+        return this;
+    }
 
     return $tpl;
 })
