@@ -114,6 +114,7 @@ define([
     }
 
     var $tpl = function (param) {
+        if (!_g.$isObject(param)) return false;
         return new $tpl.fn._init(param);
     }
 
@@ -125,10 +126,11 @@ define([
 
         _init: function (param) {
 
-            if (param.$focus) var _hash = _g.$hash().replace('?', '');
+            var _hash = _g.$hash().replace('?', '');
+            param.$hash = _g.$s2o(_hash, '&') || {};
             param.$update = this.$update.bind(this);
             param.$container = this.$container;
-            if (_g.$isFunction(param.$init)) param.$init(_g.$s2o(_hash, '&') || {});
+            if (_g.$isFunction(param.$init)) param.$init();
 
             this.param = param;
             this.template = param.template || '';
@@ -140,6 +142,20 @@ define([
             this._tpl = this._creatDom();
 
             return this;
+        },
+
+        _hashController: function () {
+            var _param = this.param || {};
+            var _focus = _param.$focus || null;
+            if (_g.$isArray(_focus)) {
+                var _data = this.data;
+                var _hash = _param.$hash;
+                _focus.forEach(function (key) {
+                    var _value = _data[key];
+                    if (_value) _hash[key] = _value;
+                }.bind(this))
+                _g.$hash('?' + _g.$o2s(_hash, '&'));
+            }
         },
 
         _creatDom: function () {
@@ -193,6 +209,7 @@ define([
         $update: function () {
 
             // auto
+            this._hashController();
             this._dataCache = _g.$clone(this.data, true);
 
             var _hash = _g.$hash();

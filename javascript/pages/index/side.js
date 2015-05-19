@@ -26,13 +26,11 @@ define([
     var tpl = $tpl({
         template: tpl,
         $focus: ["type", "from"],
-        $init: function (_hash) {
-            console.log(_hash);
+        $init: function () {
             this.data = _data;
         },
         test: function (_id, _s, _tmp) {
             if (_tmp) this.data.info.name = 'PP' + _id + _s;
-            _g.$hash(_id);
         }
     });
     // console.log(tpl);
@@ -47,7 +45,7 @@ define([
     //})
 
     _g.$watchHash(function (_hash) {
-        alert(_hash)
+        console.log(_hash)
     })
     // _g.$hash('xxx');
 
