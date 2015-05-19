@@ -152,6 +152,28 @@ define(function ($p, $f, $w) {
         })()
     }
 
+    if (!window.JSON) {
+        var _json = {};
+        _json.parse = function (json) {
+            if (json === null) return json;
+            if ($p.$isString(json)) {
+                json = json.trim();
+                if (json) return ( new Function('return ' + json) )();
+            }
+            throw new Error('Invalid JSON: ' + json);
+        }
+        _json.stringify = function (json) {
+            var _tmp = "";
+            for (var key in json) {
+                if (json.hasOwnProperty(key)) _tmp += "," + key + ":" + json[key];
+            }
+            if (_tmp != "") _tmp = _tmp.substring(1);
+
+            return "{" + _tmp + "}";
+        }
+        window.JSON = _json;
+    }
+
     /**
      *修复低版本(IE 6,7) console报错问题
      *
@@ -176,15 +198,6 @@ define(function ($p, $f, $w) {
         var _list = _cnt.childNodes;
         return _list.length > 1 ? _cnt : _list[0];
     };
-    $p.$parseJSON = function (_json) {
-        if (_json === null) return _json;
-        if (window.JSON && window.JSON.parse) return window.JSON.parse(_json);
-        if ($p.$isString(_json)) {
-            _json = _json.trim();
-            if (_json) return ( new Function('return ' + _json) )();
-        }
-        throw new Error('Invalid JSON: ' + _json);
-    }
 
     // for in
     $p.$forIn = function (obj, callback, thisArg) {
@@ -214,7 +227,29 @@ define(function ($p, $f, $w) {
         });
         return _obj;
     };
-    console.log($p.$s2o('x=1&y=2', '&'));
+
+    // object to string
+    $p.$o2s = function (_object, _split, _encode) {
+        if (!_object) return '';
+        var _arr = [];
+        $p.$forIn(_object, function (_value, _key) {
+            if ($p.$isFunction(_value)) return;
+            else if ($p.$isArray(_value)) _value = _value.join(',');
+            else if ($p.$isObject(_value)) _value = JSON.stringify(_value);
+
+            if (!!_encode) _value = encodeURIComponent(_value);
+            _arr.push(encodeURIComponent(_key) + '=' + _value);
+        });
+        return _arr.join(_split || ',');
+    };
+    var obj = {
+        a: [1, 2, 3],
+        b: {a: 'a', b: 'b'},
+        c: 'e',
+        d: 1,
+        e: true
+    };
+    console.log($p.$o2s(obj, '&'));
 
     // clone
     $p.$clone = function (target, deep) {
@@ -319,7 +354,7 @@ define(function ($p, $f, $w) {
                     _xhr = this._createXhrObject();
                 _xhr.onreadystatechange = function () {
                     if (_xhr.readyState !== 4) return;
-                    var _responseData = _dataType == 'JSON' ? $p.$parseJSON(_xhr.responseText) : _xhr.responseText;
+                    var _responseData = _dataType == 'JSON' ? JSON.parse(_xhr.responseText) : _xhr.responseText;
                     (_xhr.status === 200) ? _success(_responseData) : _error(_xhr.status);
                 };
                 _xhr.open(_method, _url, true);
