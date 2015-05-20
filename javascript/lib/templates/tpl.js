@@ -249,6 +249,7 @@ define([
                 });
                 if (_name) _parent.param[_name].apply(newParam, arguments);
             }
+            newParam.$parent = _parent;
             return $tpl(newParam);
         },
 

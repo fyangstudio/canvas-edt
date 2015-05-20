@@ -19,12 +19,13 @@ define([
         var _cnt = sd.$extend({
             test: function (_id, _s, _tmp) {
                 this.$super(_id, _s, _tmp);
+                console.log(this)
                 console.log(this.$container);
             }
         }).$inject('#test');
         _cnt.$on('update', function () {
 
-        })
+        });
     };
     //console.log($w)
     //console.log(ie);
