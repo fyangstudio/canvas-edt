@@ -86,7 +86,7 @@ define([
                     var _pArr = [];
                     var _pCount = 0;
                     _arr.forEach(function (param) {
-                        if (param.indexOf("'") < 0 && isNaN(param) && param != '$event') {
+                        if (param.indexOf("'") < 0 && isNaN(param) && param.indexOf(".") > 0 && param != '$event') {
                             _variables.push(param.split('.')[0]);
                             _pArr.push(param);
                             _fn = _fn.replace(param, 'tpl_P[' + _pCount++ + ']');
@@ -176,13 +176,13 @@ define([
                             var _o = _event[_tmp];
                             _u.$addEvent(_n, _o.E, (function (_o) {
                                 return function ($event) {
-                                    var _f = function (_fs) {
-                                        var _tmp = new Function("$event, tpl_P", _fs);
-                                        _tmp.call(this, $event, _o.P);
+                                    var _f = function (_fs, $w, _g) {
+                                        var _tmp = new Function("$event, tpl_P, $w, _g", _fs);
+                                        _tmp.call(this, $event, _o.P, $w, _g);
                                     };
                                     // fuck IE
                                     try {
-                                        _f.call(this, _o.F);
+                                        _f.call(this, _o.F, $w, _g);
                                     } catch (e) {
                                         try {
                                             _f.call(this, "this.data." + _o.F);

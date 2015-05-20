@@ -223,7 +223,6 @@ define(function ($p, $f, $w) {
             for (var i = 0, l = _calls.length; i < l; i++) {
                 if (fn === _calls[i]) {
                     _calls.splice(i, 1);
-                    console.log(_calls)
                     return this;
                 }
             }

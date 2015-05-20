@@ -19,7 +19,7 @@
         {{#if book.read}}
             <p on-click={{this.test(book.id,'sss',1)}}>{{book.name}}：已读</p>
         {{#else}}
-            <p on-click={{alert(info.name)}}>{{book.name}}：未读</p>
+            <p on-click={{console.log(_g)}}>{{book.name}}：未读</p>
         {{/if}}
         {{#if !!book.note}}
             {{#list book.note as n}}
