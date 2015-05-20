@@ -206,6 +206,11 @@ define([
             return _tpl;
         },
 
+        // async get data function
+        $get: function () {
+            // todo
+        },
+
         $update: function () {
 
             // auto
