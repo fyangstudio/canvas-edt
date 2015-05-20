@@ -209,6 +209,28 @@ define(function ($p, $f, $w) {
         return this;
     }
 
+    // off去除自定义事件
+    $p.$off = function (event, fn) {
+        if (!this._handles) return;
+        if (!event) this._handles = {};
+        var _handles = this._handles, _calls;
+
+        if (_calls = _handles[event]) {
+            if (!fn) {
+                _handles[event] = [];
+                return this;
+            }
+            for (var i = 0, l = _calls.length; i < l; i++) {
+                if (fn === _calls[i]) {
+                    _calls.splice(i, 1);
+                    console.log(_calls)
+                    return this;
+                }
+            }
+        }
+        return this;
+    }
+
     // @return {node}             字符串转HTML
     $p.$parseHTML = function (txt) {
         if (!txt) return;

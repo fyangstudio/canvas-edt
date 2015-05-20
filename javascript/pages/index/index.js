@@ -23,9 +23,11 @@ define([
                 console.log(this.$container);
             }
         }).$inject('#test');
-        _cnt.$on('update', function () {
+        var _t = function () {
 
-        });
+        };
+        _cnt.$on('update', _t);
+        _cnt.$off('update', _t);
     };
     //console.log($w)
     //console.log(ie);

@@ -266,6 +266,7 @@ define([
     $tpl.fn._init.prototype = $tpl.fn;
 
     $tpl.fn.$on = _g.$on;
+    $tpl.fn.$off = _g.$off;
 
     return $tpl;
 })
