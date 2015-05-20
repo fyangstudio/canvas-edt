@@ -194,6 +194,21 @@ define(function ($p, $f, $w) {
         };
     }
 
+    // on自定义事件
+    $p.$on = function (event, fn) {
+        if (typeof event === "object") {
+            var _on = arguments.callee;
+            for (var i in event) {
+                _on(i, event[i]);
+            }
+        } else {
+            var _handles = this._handles || (this._handles = {}),
+                _calls = _handles[event] || (_handles[event] = []);
+            _calls.push(fn);
+        }
+        return this;
+    }
+
     // @return {node}             字符串转HTML
     $p.$parseHTML = function (txt) {
         if (!txt) return;
